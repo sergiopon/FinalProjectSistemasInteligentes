@@ -8,7 +8,7 @@
 | 003 | [Domain safety helpers](003-domain-safety.md) | 001, 002 | Implemented |
 | 004 | [Domain decision agent](004-domain-decision-agent.md) | 001, 002 | Implemented |
 | 005 | [Domain clauses and priority](005-domain-clauses-priority.md) | 001, 002 | Implemented |
-| 006 | [Ports](006-ports.md) | 001, 002 | Ready |
+| 006 | [Ports](006-ports.md) | 001, 002 | Implemented |
 | 007 | [ML data cleaning](007-ml-data-cleaning.md) | 002, 003 | To draft |
 | 008 | [ML grouped split](008-ml-grouped-split.md) | 007 | To draft |
 | 009 | [ML representations](009-ml-representations.md) | 007 | To draft |
@@ -43,3 +43,4 @@
 | 2026-11-07 | 001 | `imported_modules` also emits `api.<name>` for `from api import <name>`; 2 tests added (38 to 40) | the form `from api import adapters` evaded `ARCHITECTURE.md` §2 rules 3 and 4 |
 | 2026-11-07 | 003 | `EMAIL_PATTERN` bounds its local part to 64 and its domain to 255 characters (also in `docs/contracts.md` §4.4); the word-boundary condition of `PHONE_PATTERN` moves into `_mask_phone` for matches without separator; 5 tests added (49 to 54) | the email pattern took quadratic time on long tokens (7.6 s for 100000 characters) and the phone pattern masked digit runs inside hex request ids; the lookbehind and boundary variants left adjacent emails and glued phones unmasked |
 | 2026-11-07 | 005 | `_SENTENCE_BOUNDARY` becomes `(?<![.!?;])[.!?;]++(?=\s|$)`; `_STRIP_CHARS` adds the Unicode spaces `str.isspace()` accepts (both also in `docs/contracts.md` §4.2); 2 tests added (18 to 20) | a comment ending in no-break spaces produced a blank clause that made `ClauseAnalysis` raise; a 2000-character punctuation run took 38 ms in the sentence regex |
+| 2026-11-07 | 006 | line-break rule of the port docstrings reads "last space that keeps the line at 100 characters or fewer (greedy fill)" | the old wording ("before column 100") contradicted "every line ≤ 100 characters" and gave a one-word third line for `compare` |
