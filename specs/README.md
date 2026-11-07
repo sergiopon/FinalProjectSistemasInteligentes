@@ -7,7 +7,7 @@
 | 002 | [Domain errors and entities](002-domain-errors-entities.md) | 000, 001 | Implemented |
 | 003 | [Domain safety helpers](003-domain-safety.md) | 001, 002 | Implemented |
 | 004 | [Domain decision agent](004-domain-decision-agent.md) | 001, 002 | Implemented |
-| 005 | [Domain clauses and priority](005-domain-clauses-priority.md) | 001, 002 | Ready |
+| 005 | [Domain clauses and priority](005-domain-clauses-priority.md) | 001, 002 | Implemented |
 | 006 | [Ports](006-ports.md) | 001, 002 | Ready |
 | 007 | [ML data cleaning](007-ml-data-cleaning.md) | 002, 003 | To draft |
 | 008 | [ML grouped split](008-ml-grouped-split.md) | 007 | To draft |
