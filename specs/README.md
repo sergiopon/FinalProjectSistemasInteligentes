@@ -5,7 +5,7 @@
 | 000 | [Tooling and pins](000-tooling-and-pins.md) | None | Implemented |
 | 001 | [Gate and dependency rule](001-gate-and-dependency-rule.md) | 000 | Implemented |
 | 002 | [Domain errors and entities](002-domain-errors-entities.md) | 000, 001 | Implemented |
-| 003 | [Domain safety helpers](003-domain-safety.md) | 001, 002 | Ready |
+| 003 | [Domain safety helpers](003-domain-safety.md) | 001, 002 | Implemented |
 | 004 | [Domain decision agent](004-domain-decision-agent.md) | 001, 002 | Ready |
 | 005 | [Domain clauses and priority](005-domain-clauses-priority.md) | 001, 002 | Ready |
 | 006 | [Ports](006-ports.md) | 001, 002 | Ready |
@@ -41,3 +41,4 @@
 | 2026-11-07 | 002 | `CommentAnalysis` moves from `api/domain/entities.py` to `api/domain/decision.py` in `docs/contracts.md` §1.1 | its `decision` field needs `DecisionResult`, and `entities.py` cannot import `decision.py` |
 | 2026-11-07 | 002, 003, 006 | `Depends on` of the index lists 001 as well | the Definition of Done of each spec uses `tests/architecture` and `scripts/security_grep.sh` from spec 001 |
 | 2026-11-07 | 001 | `imported_modules` also emits `api.<name>` for `from api import <name>`; 2 tests added (38 to 40) | the form `from api import adapters` evaded `ARCHITECTURE.md` §2 rules 3 and 4 |
+| 2026-11-07 | 003 | `EMAIL_PATTERN` bounds its local part to 64 and its domain to 255 characters (also in `docs/contracts.md` §4.4); the word-boundary condition of `PHONE_PATTERN` moves into `_mask_phone` for matches without separator; 5 tests added (49 to 54) | the email pattern took quadratic time on long tokens (7.6 s for 100000 characters) and the phone pattern masked digit runs inside hex request ids; the lookbehind and boundary variants left adjacent emails and glued phones unmasked |
