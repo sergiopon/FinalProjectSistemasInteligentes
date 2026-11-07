@@ -37,7 +37,7 @@ None new (standard library: `hashlib`, `logging`, `re`, `pathlib`, `typing`).
 ## Interfaces and types
 
 Module constants (compiled with `re.compile`, no flags):
-- `EMAIL_PATTERN: Final[re.Pattern[str]]` = `r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"`
+- `EMAIL_PATTERN: Final[re.Pattern[str]]` = `r"[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,255}\.[A-Za-z]{2,}"`
 - `PHONE_PATTERN: Final[re.Pattern[str]]` = `r"\+?\(?\d[\d\s().-]{5,}\d"`
 - `ID_PATTERN: Final[re.Pattern[str]]` = `r"\b\d{6,10}\b"`
 - `MIN_PHONE_DIGITS: Final[int] = 7`, `MAX_UNSEPARATED_DIGITS: Final[int] = 10`
@@ -64,9 +64,11 @@ Functions and class:
 `mask_contact_data(text)`:
 1. `EMAIL_PATTERN.sub(EMAIL_MASK, text)`.
 2. `PHONE_PATTERN.sub(_mask_phone, ...)`. `_mask_phone`: with `digits` = number of characters of the match for
-   which `str.isdecimal()` is true, returns `PHONE_MASK` when `digits >= MIN_PHONE_DIGITS` and (`digits <
-   len(match)`, meaning the match holds a separator from whitespace, `(`, `)`, `.`, `-`, `+`, or `digits >
-   MAX_UNSEPARATED_DIGITS`); otherwise returns the matched text unchanged.
+   which `str.isdecimal()` is true, returns `PHONE_MASK` when `digits >= MIN_PHONE_DIGITS` and either `digits <
+   len(match)` (the match holds a separator from whitespace, `(`, `)`, `.`, `-`, `+`), or `digits >
+   MAX_UNSEPARATED_DIGITS` and the character before `match.start()` and the character after `match.end()` in
+   `match.string` are each absent or not a word character (`\w`, so digit runs inside a hex id stay unchanged);
+   otherwise returns the matched text unchanged.
 3. `ID_PATTERN.sub(ID_MASK, ...)`; returns the result. A text without matches is returned equal to the input.
 
 `redact(text)` returns `f"<redacted len={len(text)} sha={hashlib.sha256(text.encode()).hexdigest()[:8]}>"`
@@ -96,7 +98,7 @@ Functions and class:
 
 ## Acceptance tests (prose)
 
-`tests/unit/domain/test_safety.py` (23 tests: 13 `test_resolve_within_*` and the 10 cases of `test_mask_contact_data_vectors`; `tmp` is pytest `tmp_path`; symlinks made with `Path.symlink_to`):
+`tests/unit/domain/test_safety.py` (28 tests: 13 `test_resolve_within_*`, `test_mask_contact_data_long_token_is_linear` and the 14 cases of `test_mask_contact_data_vectors`; `tmp` is pytest `tmp_path`; symlinks made with `Path.symlink_to`):
 - `test_resolve_within_inside`: `(tmp, Path("v001/manifest.json"))` → `tmp.resolve() / "v001/manifest.json"`.
 - `test_resolve_within_normalizes_dots`: `(tmp, Path("v001/../v002/x.json"))` → `tmp.resolve() / "v002/x.json"`.
 - `test_resolve_within_dot_returns_base`: `(tmp, Path("."))` → `tmp.resolve()`.
@@ -113,6 +115,8 @@ Functions and class:
   resolved"`, `__cause__` is a `ValueError`.
 - `test_resolve_within_base_symlink_loop`: `tmp/loop` → `tmp/loop`; `(tmp / "loop", Path("a"))` →
   `UnsafePathError`, `detail == "base cannot be resolved"`, `__cause__` is a `RuntimeError`.
+- `test_mask_contact_data_long_token_is_linear`: `mask_contact_data("a" * 100000)` and `mask_contact_data("@" + "a" * 100000)`
+  return the input unchanged and the two calls together take less than 1.0 second (`time.perf_counter`).
 - `test_resolve_within_base_null_byte`: `(Path("a\x00b"), Path("x"))` → `UnsafePathError`,
   `detail == "base cannot be resolved"`, `__cause__` is a `ValueError`.
 - `test_mask_contact_data_vectors` (parametrized, input → output):
@@ -123,6 +127,9 @@ Functions and class:
   - `"Número 573001234567"` (12 digits, no separator) → `"Número [PHONE]"`
   - `"Llamar al 3001234567"` (10 digits, no separator) → `"Llamar al [ID]"`
   - `"Juan.Perez99@correo.com"` → `"[EMAIL]"`
+  - `"req ab12345678901cd"` → unchanged (digits inside a word are not a phone);
+  - `"ana@uni.co1juan@x.com"` → `"[EMAIL][EMAIL]"`;
+  - `"llamar al 300 123 4567ya"` → `"llamar al [PHONE]ya"`; `"cel3001 234 567"` → `"cel[PHONE]"`;
   - `"Código 12345"` → unchanged; `"Tel 123 456"` (6 digits) → unchanged;
     `"Semestres 2023-1 y 2023-2"` → unchanged; `"Sin datos de contacto."` → unchanged.
 
@@ -176,7 +183,7 @@ Functions and class:
 
 - [ ] Tests: `.venv/bin/pytest -q -m "not integration"` prints `N passed`, exit code 0;
   `.venv/bin/pytest -q tests/unit/domain/test_safety.py tests/unit/domain/test_redaction.py
-  tests/unit/domain/test_errors.py` prints `49 passed` (23 in `test_safety.py`, 11 in `test_redaction.py`, 15 in
+  tests/unit/domain/test_errors.py` prints `54 passed` (28 in `test_safety.py`, 11 in `test_redaction.py`, 15 in
   `test_errors.py`).
 - [ ] Linter: `.venv/bin/ruff check .` prints `All checks passed!`; formatter: `.venv/bin/ruff format --check .`
   exits 0.

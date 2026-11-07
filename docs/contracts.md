@@ -182,9 +182,10 @@ Vector, `comment_count = 100`:
   `target = (root / candidate).resolve(strict=False)`; `target.is_relative_to(root)` false →
   `UnsafePathError("path escapes base")`; returns `target`. Vectors: `(tmp, Path("v001/manifest.json"))` →
   `tmp/v001/manifest.json`; `(tmp, Path("../x"))` and `(tmp, Path("/etc/passwd"))` → `UnsafePathError`.
-- Patterns (compiled module constants): `EMAIL_PATTERN = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"`;
+- Patterns (compiled module constants): `EMAIL_PATTERN = r"[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,255}\.[A-Za-z]{2,}"`;
   `PHONE_PATTERN = r"\+?\(?\d[\d\s().-]{5,}\d"` replaced only when the match holds ≥ 7 digits and contains a
-  separator (space, `-`, `.`, `(`, `)`, `+`) or more than 10 digits; `ID_PATTERN = r"\b\d{6,10}\b"`.
+  separator (space, `-`, `.`, `(`, `)`, `+`), or holds more than 10 digits with no word character (`\w`) right before or
+  after it; `ID_PATTERN = r"\b\d{6,10}\b"`.
 - `mask_contact_data(text: str) -> str`: applies, in order, email → `"[EMAIL]"`, phone → `"[PHONE]"`,
   id → `"[ID]"`. Vector: `"Escribir a ana.gomez@uni.edu.co o al 300 123 4567, código 20231045"` →
   `"Escribir a [EMAIL] o al [PHONE], código [ID]"`.
