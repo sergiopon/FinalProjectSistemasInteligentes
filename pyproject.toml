@@ -1,0 +1,59 @@
+[project]
+name = "from-comment-to-action"
+version = "0.1.0"
+requires-python = "==3.12.*"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "N", "UP", "B", "C90", "PLR", "BLE", "S", "T20", "D", "TID"]
+# D107: Google style documents constructor arguments in the class docstring. N803, N806: ARCHITECTURE.md section 6 allows X for feature matrices.
+ignore = ["D107", "N803", "N806"]
+
+[tool.ruff.lint.per-file-ignores]
+# tests use assert, literal expected values and subprocess with list arguments.
+"tests/**" = ["D", "S101", "S603", "S607", "PLR2004"]
+"scripts/**" = ["T201"]
+# api/main.py and the four ml command-line modules: ARCHITECTURE.md section 6 allows a generic catch (and print in ml main()) only there.
+"api/main.py" = ["BLE001"]
+"ml/train.py" = ["T201", "BLE001"]
+"ml/artifact.py" = ["T201", "BLE001"]
+"ml/gold.py" = ["T201", "BLE001"]
+"ml/gold_eval.py" = ["T201", "BLE001"]
+"ml/representations.py" = ["T201", "BLE001"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.isort]
+required-imports = ["from __future__ import annotations"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.mccabe]
+max-complexity = 8
+
+[tool.ruff.lint.pylint]
+max-statements = 20
+max-args = 6
+max-branches = 8
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+explicit_package_bases = true
+
+# These five packages ship no py.typed marker at the pinned versions (checked on 2026-11-05); numpy, torch, spacy, sentence_transformers, fastapi, pydantic, starlette, uvicorn and httpx ship one and are type-checked.
+[[tool.mypy.overrides]]
+module = ["sklearn.*", "pandas.*", "scipy.*", "joblib.*", "mapie.*"]
+ignore_missing_imports = true
+
+# pytest runs from the repository root; integration tests are outside the Gate.
+[tool.pytest.ini_options]
+pythonpath = ["."]
+addopts = "--import-mode=importlib"
+testpaths = ["tests"]
+markers = ["integration: needs the trained bundle and the embedding cache"]

@@ -2,7 +2,7 @@
 
 | # | Spec | Depends on | Status |
 |---|---|---|---|
-| 000 | [Tooling and pins](000-tooling-and-pins.md) | None | Ready |
+| 000 | [Tooling and pins](000-tooling-and-pins.md) | None | Implemented |
 | 001 | [Gate and dependency rule](001-gate-and-dependency-rule.md) | 000 | To draft |
 | 002 | [Domain errors and entities](002-domain-errors-entities.md) | 000 | To draft |
 | 003 | [Domain safety helpers](003-domain-safety.md) | 002 | To draft |
