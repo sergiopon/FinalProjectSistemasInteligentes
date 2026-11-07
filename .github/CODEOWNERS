@@ -1,0 +1,18 @@
+# Files that every spec depends on need Sergio's review.
+/ARCHITECTURE.md @sergiopon
+/security-rules.md @sergiopon
+/CONTEXT.md @sergiopon
+/DESIGN.md @sergiopon
+/README.md @sergiopon
+/CONTRIBUTING.md @sergiopon
+/pyproject.toml @sergiopon
+/requirements.txt @sergiopon
+/requirements-dev.txt @sergiopon
+/config/ @sergiopon
+/docs/ @sergiopon
+/specs/ @sergiopon
+/scripts/ @sergiopon
+/.github/ @sergiopon
+/api/domain/ @sergiopon
+/api/ports/ @sergiopon
+/tests/architecture/ @sergiopon

@@ -68,6 +68,7 @@ the Gate green.
 
 ## Where things live
 
+- `CONTRIBUTING.md`: the workflow every teammate follows. Read it before your first spec.
 - `ARCHITECTURE.md` and `security-rules.md`: rules every spec follows.
 - `CONTEXT.md`: stack, pinned versions and commands, including the Gate.
 - `docs/contracts.md`: contracts shared by all specs. `docs/adr/`: architecture decisions.
