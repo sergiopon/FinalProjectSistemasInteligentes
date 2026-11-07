@@ -1,0 +1,16 @@
+{
+  "costs": {
+    "error_cost": 5.0,
+    "review_cost": 1.0,
+    "review_if_set_not_singleton": true
+  },
+  "conformal": {
+    "alpha": 0.1
+  },
+  "limits": {
+    "max_text_chars": 2000,
+    "max_upload_bytes": 2097152,
+    "max_upload_rows": 5000
+  },
+  "models_dir": "models"
+}

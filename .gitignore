@@ -1,0 +1,13 @@
+# SEC-10
+data/
+reports/
+models/v*/bundle.joblib
+.venv/
+__pycache__/
+.env
+
+# Tool caches
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
