@@ -25,13 +25,13 @@ Critical path: 000, 002, 003, 007, 008 and 009, 010, 011, 013, 017, 018, 024, 02
 <!-- progress:start -->
 _Updated 2026-11-07 from `specs/README.md`._
 
-Implemented: **2 of 31** specs.
+Implemented: **3 of 31** specs.
 
 | # | Spec | Owner | Status |
 |---|---|---|---|
 | 000 | [Tooling and pins](specs/000-tooling-and-pins.md) | Sergio Ponce | Implemented |
 | 001 | [Gate and dependency rule](specs/001-gate-and-dependency-rule.md) | Sergio Ponce | Implemented |
-| 002 | [Domain errors and entities](specs/002-domain-errors-entities.md) | Sergio Ponce | Ready |
+| 002 | [Domain errors and entities](specs/002-domain-errors-entities.md) | Sergio Ponce | Implemented |
 | 003 | [Domain safety helpers](specs/003-domain-safety.md) | Sergio Ponce | Ready |
 | 004 | [Domain decision agent](specs/004-domain-decision-agent.md) | Sergio Ponce | Ready |
 | 005 | [Domain clauses and priority](specs/005-domain-clauses-priority.md) | Sergio Ponce | Ready |
