@@ -4,7 +4,7 @@
 |---|---|---|---|
 | 000 | [Tooling and pins](000-tooling-and-pins.md) | None | Implemented |
 | 001 | [Gate and dependency rule](001-gate-and-dependency-rule.md) | 000 | Implemented |
-| 002 | [Domain errors and entities](002-domain-errors-entities.md) | 000, 001 | Ready |
+| 002 | [Domain errors and entities](002-domain-errors-entities.md) | 000, 001 | Implemented |
 | 003 | [Domain safety helpers](003-domain-safety.md) | 001, 002 | Ready |
 | 004 | [Domain decision agent](004-domain-decision-agent.md) | 001, 002 | Ready |
 | 005 | [Domain clauses and priority](005-domain-clauses-priority.md) | 001, 002 | Ready |
