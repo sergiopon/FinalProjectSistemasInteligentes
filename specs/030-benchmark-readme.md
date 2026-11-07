@@ -3,9 +3,9 @@ Riesgo: alto
 
 ## Objective
 
-The guide asks to measure inference time and document security and quality (`docs/analysis.md` §1); neither a
-script nor `README.md` exists. This spec adds `scripts/benchmark.py` (p50 and p95 latency of `POST /predict` and
-`POST /predict-batch` through the in-process app with the active bundle) and `README.md`.
+The guide asks to measure inference time and document security and quality (`docs/analysis.md` §1); there is no
+benchmark script and `README.md` has no usage guide. This spec adds `scripts/benchmark.py` (p50 and p95 latency of `POST /predict` and
+`POST /predict-batch` through the in-process app with the active bundle) and the usage sections of `README.md`.
 
 ## Depends on
 
@@ -21,7 +21,7 @@ script nor `README.md` exists. This spec adds `scripts/benchmark.py` (p50 and p9
 ## Files to create/modify
 
 1. `scripts/benchmark.py` (new; no Python module exists in `scripts/` yet, layout per `ARCHITECTURE.md` §6).
-2. `tests/unit/scripts/test_benchmark.py` (new). 3. `README.md` (new). No existing test changes expectation.
+2. `tests/unit/scripts/test_benchmark.py` (new). 3. `README.md` (modify: it already holds the team split and the progress block). No existing test changes expectation.
 
 ## External dependencies
 
@@ -79,7 +79,10 @@ Errors: `InvalidInputError` and `InferenceError` from `api.domain.errors`.
    sort_keys=True)` as the last line of stdout (API logs also go to stdout, SEC-05); returns 0. `AppError` →
    prints `f"benchmark failed: {error.code}"` to stderr and returns 2. The module ends with
    `if __name__ == "__main__": raise SystemExit(main())`.
-8. `README.md` content is exactly the block below (outer `~~~~` fence not included). Copy rules applied: no em
+8. `README.md` keeps, unchanged, the `## Team split` and `## Progress` sections (including the
+   `<!-- progress:start -->` and `<!-- progress:end -->` markers) and the `## Where things live` section; they move
+   to the end of the file, after the block below. The rest of the file is exactly the block below (outer `~~~~`
+   fence not included). Copy rules applied: no em
    dash, no claim or number without a source in `docs/analysis.md`, `ARCHITECTURE.md` or `security-rules.md`.
 
 ~~~~markdown
