@@ -12,7 +12,7 @@ cases below. Use cases (spec 022) call `decide`; nothing else changes.
 
 ## Depends on
 
-002 (`api/domain/entities.py`, `api/domain/errors.py`).
+001 (`tests/architecture`, `scripts/security_grep.sh`), 002 (`api/domain/entities.py`, `api/domain/errors.py`). Both MUST be `Implemented` before this spec runs.
 
 ## Governing files
 
@@ -29,7 +29,7 @@ cases below. Use cases (spec 022) call `decide`; nothing else changes.
 
 1. `api/domain/decision.py` (new). Same structure as `api/domain/entities.py` (spec 002): module docstring,
    `from __future__ import annotations`, standard library imports, then `api.domain` imports.
-2. `tests/unit/domain/test_decision.py` (new). Same structure as `tests/unit/domain/test_entities.py` (spec 002).
+2. `tests/unit/domain/test_decision.py` (new). Same structure as `tests/unit/domain/test_entities.py` (spec 002). It MUST stay ≤ 300 lines (spec 001, `test_size_limits`): the implementer builds the probability triples and sets with one private helper function per kind (`_probs`, `_set`) and adds no other test file.
 
 No existing test changes expectation.
 
@@ -54,7 +54,7 @@ Module `api/domain/decision.py`, imports exactly: `from __future__ import annota
   because its `decision` field needs `DecisionResult`, and `api.domain.entities` cannot import this module) with
   fields, in this order: `comment: Comment`, `probabilities: ClassProbabilities`, `conformal_set: ConformalSet`,
   `decision: DecisionResult`, `aspects: tuple[AspectSentiment, ...]`, `influences: tuple[WordInfluence, ...]`.
-  `__post_init__(self) -> None` validates `aspects` (step 5 of Expected behavior).
+  `__post_init__(self) -> None` validates `aspects` (step 6 of Expected behavior).
 - `def decide(probabilities: ClassProbabilities, conformal_set: ConformalSet, costs: DecisionCosts) ->
   DecisionResult`.
 
@@ -79,12 +79,12 @@ order and has a `Returns:` section. Private helpers, if any, start with `_` and 
 4. `label` in the result is always `probabilities.top()`, also when the decision is `review`.
 5. `decide` reads no configuration, no clock and no global state, logs nothing and raises nothing for valid inputs.
    `conformal_set.confidence_level` is not read.
-
-With the defaults (5.0, 1.0, true), rule 4 classifies a singleton set holding the top label when `p_top >= 0.8`.
-5. `CommentAnalysis.__post_init__`: let `positions` be `[ASPECT_ORDER.index(item.group) for item in aspects]`; if
+6. `CommentAnalysis.__post_init__`: let `positions` be `[ASPECT_ORDER.index(item.group) for item in aspects]`; if
    `positions` is not strictly increasing (a repeated group or a group out of `ASPECT_ORDER`), raise
    `InvalidInputError` with `detail` `"aspects must be unique and follow ASPECT_ORDER"`. An empty `aspects` is
    valid. No other field is validated.
+
+With the defaults (5.0, 1.0, true), rule 4 classifies a singleton set holding the top label when `p_top >= 0.8`.
 
 ## Edge cases and error handling
 
@@ -184,7 +184,7 @@ Additional vectors:
       4 cases each; tests 18-24: 7), exit code 0.
 - [ ] `.venv/bin/ruff check .` → `All checks passed!`.
 - [ ] `.venv/bin/ruff format --check .` → exit code 0.
-- [ ] `.venv/bin/mypy --strict api ml tests` → `Success: no issues found in N source files`.
+- [ ] `.venv/bin/mypy --strict api tests` → `Success: no issues found in N source files` (`ml/` holds no module until spec 007).
 - [ ] `.venv/bin/pytest -q tests/architecture` → `N passed` (domain imports the standard library only; size limits).
 - [ ] `.venv/bin/pytest -q -m "not integration" --cov=api --cov=ml --cov-report=term-missing` → the row of
       `api/domain/decision.py` shows ≥ 80 %.
@@ -193,4 +193,4 @@ Additional vectors:
 - [ ] `grep -nE "^\s*assert |print\(|logging" api/domain/decision.py` → no output (the words `logging` and `print(`
       MUST NOT appear in the module, docstrings and comments included).
 - [ ] `bash scripts/security_grep.sh` → no output, exit code 0.
-- [ ] `bash scripts/gate.sh` → last line `GATE OK`, exit code 0.
+- [ ] Gate: not applicable until spec 007: `bash scripts/gate.sh` exits 2 at step 3 (mypy) while `ml/` holds no `.py` file; `GATE OK` is checked once spec 007 is implemented.

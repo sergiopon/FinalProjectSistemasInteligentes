@@ -28,8 +28,10 @@ them through their constructors. The ports hold no behavior; the tests are struc
 1. `api/ports/models.py` (new): `ModelStore`, `PolarityModel`, `AspectModel`, `Explainer`.
 2. `api/ports/text.py` (new): `Anonymizer`, `Summarizer`, `TopicModel`.
 3. `api/ports/monitoring.py` (new): `DriftDetector`, `MetricsStore`.
-4. `tests/unit/ports/test_ports.py` (new): structural tests and one fake per port, for all three modules (a
-   single test file keeps the spec at 4 files).
+4. `tests/unit/ports/test_ports_structure.py` (new): tests 1 to 4 of "Acceptance tests", `PORTS`, the method map and
+   the signature table.
+5. `tests/unit/ports/test_ports_fakes.py` (new): tests 5 to 7 and the 9 fakes. Two files keep each one under 300
+   lines (spec 001, `test_size_limits`).
 
 Pattern reference: no module exists yet in `api/ports/`; module header and docstring layout follow
 `api/domain/entities.py` (spec 002); test layout follows `tests/unit/domain/test_entities.py` (spec 002). No
@@ -78,7 +80,13 @@ method body is its docstring followed by `...`. `str(inspect.signature(Port.meth
 
 1. Each method docstring is Google style: a one-line summary, a blank line, then the sections `Preconditions:`,
    `Postconditions:` and `Raises:` in this order, each with the indented text below. `TEXTS` stands for the
-   sentence "`texts` holds 1 to 5000 items and every item is non-empty after `strip()`."
+   sentence "`texts` holds 1 to 5000 items and every item is non-empty after `strip()`." Text rule: a cell holds one or
+   more sentences separated by one space; a `;` inside a cell ends a sentence, and each part is written as its own
+   sentence starting with a capital letter and ending with a period; a line longer than 100 characters is broken at
+   the last space before column 100 and continues with the same indentation. Final text of the two mixed cells:
+   `summarize` Preconditions "`texts` holds 1 to 5000 items and every item is non-empty after `strip()`. `k` is in
+   1..10."; `compare` Preconditions "`texts` holds 1 to 5000 items and every item is non-empty after `strip()`.
+   `body_sha256` is 64 lowercase hex characters. `created_at` is ISO 8601 UTC ending in `Z`."
 2. Section texts:
 
 | Method | Preconditions | Postconditions | Raises |
@@ -157,7 +165,7 @@ method body is its docstring followed by `...`. `str(inspect.signature(Port.meth
 | Case | Result |
 |---|---|
 | `isinstance(object(), <any port>)` | `TypeError` whose message contains `"runtime_checkable"` (Protocol is not runtime checkable) |
-| A fake whose method signature differs from the port | Not committed. Verified once by hand with a throwaway fake (`def predict_proba(self, texts: list[str]) -> ...`): `mypy --strict` reports `Incompatible types in assignment`; the implementer records the observed line in the report, not in the repository |
+| A fake whose method signature differs from the port | Not committed. Verified once by hand with a throwaway fake in `/tmp/bad_polarity.py` (outside the repository): `class BadPolarity` with `def predict_proba(self, texts: list[str]) -> tuple[ClassProbabilities, ...]` and `def predict_set(self, texts: Sequence[str]) -> tuple[ConformalSet, ...]`, used as `model: PolarityModel = BadPolarity()`. Command `MYPYPATH=. .venv/bin/mypy --strict /tmp/bad_polarity.py` prints a line containing `Incompatible types in assignment (expression has type "BadPolarity", variable has type "PolarityModel")`; the implementer copies that line into the report, not into the repository |
 | A port gains a method not listed in the table | `test_port_exposes_exactly_contract_methods` fails |
 
 The ports raise nothing themselves: Preconditions are enforced by callers and adapters, not by the Protocols. If a
@@ -166,8 +174,12 @@ reports its name and the reason.
 
 ## Acceptance tests (prose)
 
-File `tests/unit/ports/test_ports.py`. A module constant `PORTS: tuple[type, ...]` lists the 9 ports in the order of
-`docs/contracts.md` §3; a module constant maps each port to its expected method names.
+Tests 1 to 4 live in `tests/unit/ports/test_ports_structure.py`; tests 5 to 7 in `tests/unit/ports/test_ports_fakes.py`.
+A module constant `PORTS: tuple[type, ...]` in the first file lists the 9 ports in the order of `docs/contracts.md`
+§3; a module constant maps each port to its expected method names. Each fake method repeats the parameter names,
+parameter types and return type of its row in the signature table (`texts`, `k`, `top_k`, `topic`, `body_sha256`,
+`created_at`, `route`, `latency_ms`, `decisions`, `report`) without default values.
+The fake instances are named `store`, `polarity`, `aspects`, `explainer`, `anonymizer`, `summarizer`, `topics` and `detector`, each annotated with its port; test 7 also uses `store: MetricsStore`.
 
 1. `test_port_is_not_runtime_checkable`: parametrized over the 9 ports; `isinstance(object(), port)` raises
    `TypeError` matching `"runtime_checkable"`.
@@ -197,8 +209,8 @@ File `tests/unit/ports/test_ports.py`. A module constant `PORTS: tuple[type, ...
    ("a b c",)`; `assign(["x y", "z w"]) == (0, 0)`; `len(terms(0)) == 5`.
 7. `test_monitoring_port_fakes_conform`: `FakeDriftDetector.compare` returns `DriftReport(body_sha256, len(texts),
    0.0, 0.0, 0.0, False, created_at)`; `FakeMetricsStore.record` and `.record_drift` have return type `None`, `.snapshot`
-   returns `MetricsSnapshot(0, None, None, 0, 0, None)`. Assertions: `compare(["texto uno"], "0" * 64,
-   "2026-11-10T12:00:00Z").row_count == 1`; `store.record("/predict", 12.5, [Decision.CLASSIFY])` and `store.record_drift(report)` are called
+   returns `MetricsSnapshot(0, None, None, 0, 0, None)`. Variables: `store: MetricsStore`, `detector: DriftDetector`, and
+   `report = detector.compare(["texto uno"], "0" * 64, "2026-11-10T12:00:00Z")`. Assertions: `report.row_count == 1`; `store.record("/predict", 12.5, [Decision.CLASSIFY])` and `store.record_drift(report)` are called
    as statements and their result is not used or asserted; `snapshot().request_count == 0`.
 
 Conformance of the fakes is proved by `mypy --strict` on `tests/` (the Gate type-check step), not at runtime.
@@ -213,7 +225,7 @@ Conformance of the fakes is proved by `mypy --strict` on `tests/` (the Gate type
 ## Definition of Done
 
 - [ ] `.venv/bin/pytest -q -m "not integration"` → `N passed`, exit code 0.
-- [ ] `.venv/bin/pytest -q tests/unit/ports/test_ports.py` → `49 passed` (9 + 9 + 14 + 14 + 3), exit code 0.
+- [ ] `.venv/bin/pytest -q tests/unit/ports` → `49 passed` (9 + 9 + 14 + 14 + 3), exit code 0.
 - [ ] `.venv/bin/ruff check .` → `All checks passed!`.
 - [ ] `.venv/bin/ruff format --check .` → exit code 0.
 - [ ] `.venv/bin/mypy --strict api tests` → `Success: no issues found in N source files` (`ml` holds no module until

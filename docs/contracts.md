@@ -30,7 +30,7 @@ tuple(AspectGroup)`, `PROBABILITY_SUM_TOLERANCE: float = 1e-6`.
 | `AspectSentiment` | `group: AspectGroup`, `polarity: Polarity`, `score: float`, `clause_index: int` | `score` in `[0.0, 1.0]`; `clause_index >= 0` |
 | `ClauseAnalysis` | `text: str`, `probabilities: ClassProbabilities`, `aspects: AspectScores` | `text` non-empty |
 | `WordInfluence` | `word: str`, `delta: float` | `word` non-empty; `-1.0 <= delta <= 1.0` |
-| `CommentAnalysis` | `comment: Comment`, `probabilities: ClassProbabilities`, `conformal_set: ConformalSet`, `decision: DecisionResult`, `aspects: tuple[AspectSentiment, ...]`, `influences: tuple[WordInfluence, ...]` | `aspects` has no repeated group and follows `ASPECT_ORDER` |
+| `CommentAnalysis` | Defined in `api/domain/decision.py` (spec 004), not here: its `decision: DecisionResult` field needs that module. Fields: `comment: Comment`, `probabilities: ClassProbabilities`, `conformal_set: ConformalSet`, `decision: DecisionResult`, `aspects: tuple[AspectSentiment, ...]`, `influences: tuple[WordInfluence, ...]` | `aspects` has no repeated group and follows `ASPECT_ORDER` |
 
 Methods (no others): `ClassProbabilities.of(polarity: Polarity) -> float`; `ClassProbabilities.top() -> Polarity`
 (highest value; tie → first in `POLARITY_ORDER`); `ConformalSet.is_singleton -> bool` (property);

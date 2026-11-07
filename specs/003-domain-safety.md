@@ -11,7 +11,7 @@ of spec 002 get their own tests.
 
 ## Depends on
 
-002.
+001 (`tests/architecture`, `scripts/security_grep.sh`), 002 (`api/domain/errors.py`, `tests/unit/domain/test_entities.py`).
 
 ## Governing files
 
@@ -25,7 +25,8 @@ of spec 002 get their own tests.
 
 1. `api/domain/safety.py` (new); same module conventions as `api/domain/entities.py`.
 2. `tests/unit/domain/test_safety.py` (new); same structure as `tests/unit/domain/test_entities.py`.
-3. `tests/unit/domain/test_errors.py` (new); same structure as `tests/unit/domain/test_entities.py`.
+3. `tests/unit/domain/test_redaction.py` (new); same structure as `tests/unit/domain/test_entities.py`.
+4. `tests/unit/domain/test_errors.py` (new); same structure as `tests/unit/domain/test_entities.py`.
 
 No existing test changes.
 
@@ -89,13 +90,13 @@ Functions and class:
 - A message containing `%` after masking is safe: `args` is `None`, so `getMessage()` does not format again.
 - A `candidate` holding a NUL character (`Path("a\x00b")`) → `UnsafePathError("path cannot be resolved")`;
   `__cause__` is a `ValueError`.
-- A record whose `getMessage()` raises `TypeError` or `ValueError` (for example message `"x %d"` with args
+- A record whose `getMessage()` raises `TypeError` or `ValueError` (message `"x %d"` with args
   `("a",)`): the exception propagates unchanged out of `filter`; the filter does not catch it.
 - `redact("\ud800")` (lone surrogate): `UnicodeEncodeError` propagates; callers pass validated text.
 
 ## Acceptance tests (prose)
 
-`tests/unit/domain/test_safety.py` (`tmp` is pytest `tmp_path`; symlinks made with `Path.symlink_to`):
+`tests/unit/domain/test_safety.py` (23 tests: 13 `test_resolve_within_*` and the 10 cases of `test_mask_contact_data_vectors`; `tmp` is pytest `tmp_path`; symlinks made with `Path.symlink_to`):
 - `test_resolve_within_inside`: `(tmp, Path("v001/manifest.json"))` → `tmp.resolve() / "v001/manifest.json"`.
 - `test_resolve_within_normalizes_dots`: `(tmp, Path("v001/../v002/x.json"))` → `tmp.resolve() / "v002/x.json"`.
 - `test_resolve_within_dot_returns_base`: `(tmp, Path("."))` → `tmp.resolve()`.
@@ -112,6 +113,8 @@ Functions and class:
   resolved"`, `__cause__` is a `ValueError`.
 - `test_resolve_within_base_symlink_loop`: `tmp/loop` → `tmp/loop`; `(tmp / "loop", Path("a"))` →
   `UnsafePathError`, `detail == "base cannot be resolved"`, `__cause__` is a `RuntimeError`.
+- `test_resolve_within_base_null_byte`: `(Path("a\x00b"), Path("x"))` → `UnsafePathError`,
+  `detail == "base cannot be resolved"`, `__cause__` is a `ValueError`.
 - `test_mask_contact_data_vectors` (parametrized, input → output):
   - `"Escribir a ana.gomez@uni.edu.co o al 300 123 4567, código 20231045"` →
     `"Escribir a [EMAIL] o al [PHONE], código [ID]"`
@@ -122,12 +125,16 @@ Functions and class:
   - `"Juan.Perez99@correo.com"` → `"[EMAIL]"`
   - `"Código 12345"` → unchanged; `"Tel 123 456"` (6 digits) → unchanged;
     `"Semestres 2023-1 y 2023-2"` → unchanged; `"Sin datos de contacto."` → unchanged.
+
+`tests/unit/domain/test_redaction.py` (11 tests: `test_redact_vectors`, `test_redact_lone_surrogate_raises` and the 9 `test_redacting_filter_*`):
 - `test_redact_vectors`: `"Juan Pérez"` → `"<redacted len=10 sha=090fd624>"`; `""` →
   `"<redacted len=0 sha=e3b0c442>"`; `"El curso fue bastante bueno"` → `"<redacted len=27 sha=c489921e>"`.
 - `test_redacting_filter_masks_message_and_args`: `logging.LogRecord("t", logging.INFO, "f", 1, "contact %s row=%d",
   ("ana@uni.edu.co", 3), None)` → `filter` returns `True`, `msg == "contact [EMAIL] row=3"`, `args is None`.
-- `test_redacting_filter_idempotent`: applying `filter` a second time leaves `msg == "contact [EMAIL] row=3"`.
-- `test_redacting_filter_masks_traceback`: a record built with `sys.exc_info()` of `ValueError("id 1234567")` →
+- `test_redacting_filter_idempotent`: builds the record of `test_redacting_filter_masks_message_and_args`, applies
+  `filter` twice, and `msg == "contact [EMAIL] row=3"` after each application.
+- `test_redacting_filter_masks_traceback`: inside `except ValueError as error` for `ValueError("id 1234567")`, the record
+  `logging.LogRecord("t", logging.ERROR, "f", 1, "failed", None, sys.exc_info())` →
   last line of `exc_text` is `"ValueError: id [ID]"`, `"1234567" not in exc_text`, `exc_info is None`.
 - `test_redacting_filter_on_handler_message`: logger `"tests.safety.message"` (`propagate = False`) with a
   `logging.StreamHandler` on its own `io.StringIO`, formatter `"%(message)s"`, and the filter added with
@@ -143,8 +150,10 @@ Functions and class:
 - `test_redacting_filter_bad_args_propagates`: `logging.LogRecord("t", logging.INFO, "f", 1, "x %d", ("a",), None)`
   → `filter` raises `TypeError`.
 - `test_redact_lone_surrogate_raises`: `redact("\ud800")` raises `UnicodeEncodeError`.
-- `test_redacting_filter_empty_exc_info`: record with `exc_info=(None, None, None)` → `exc_text == "NoneType:
-  None"`.
+- `test_redacting_filter_empty_exc_info`: `logging.LogRecord("t", logging.INFO, "f", 1, "m", None, (None, None, None))`
+  → `filter` returns `True`, `exc_text == "NoneType: None"`, `exc_info is None`.
+- `test_redacting_filter_bad_format_propagates`: `logging.LogRecord("t", logging.INFO, "f", 1, "x %y", ("a",), None)`
+  → `filter` raises `ValueError`.
 
 `tests/unit/domain/test_errors.py`:
 - `test_errors_codes` (parametrized, class → `code`): `AppError` `internal_error`, `InvalidInputError`
@@ -166,8 +175,9 @@ Functions and class:
 ## Definition of Done
 
 - [ ] Tests: `.venv/bin/pytest -q -m "not integration"` prints `N passed`, exit code 0;
-  `.venv/bin/pytest -q tests/unit/domain/test_safety.py tests/unit/domain/test_errors.py` prints `47 passed` (32 in
-  `test_safety.py`, 15 in `test_errors.py`).
+  `.venv/bin/pytest -q tests/unit/domain/test_safety.py tests/unit/domain/test_redaction.py
+  tests/unit/domain/test_errors.py` prints `49 passed` (23 in `test_safety.py`, 11 in `test_redaction.py`, 15 in
+  `test_errors.py`).
 - [ ] Linter: `.venv/bin/ruff check .` prints `All checks passed!`; formatter: `.venv/bin/ruff format --check .`
   exits 0.
 - [ ] Architecture and size: `.venv/bin/pytest -q tests/architecture` prints `N passed`, exit code 0.

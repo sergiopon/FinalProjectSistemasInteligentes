@@ -4,7 +4,7 @@ Riesgo: alto
 ## Objective
 
 `CONTEXT.md` defines the `Gate` (8 ordered steps) and `ARCHITECTURE.md` §2 rule 6 requires
-`tests/architecture/test_dependencies.py`, but neither exists. When this spec is done: `bash scripts/gate.sh` runs
+`tests/architecture/test_dependencies.py`, but both are missing. When this spec is done: `bash scripts/gate.sh` runs
 the 8 steps and stops at the first failure; `bash scripts/security_grep.sh` runs every automatable check of
 `security-rules.md` §8; architecture tests enforce the layer rule, the no-`__init__.py` rule (ADR-005) and the module
 and class size limits of `ARCHITECTURE.md` §6.
@@ -108,7 +108,7 @@ Test files do not import each other; each defines its own `REPO_ROOT: Final[Path
   `SCANNED_DIRS: Final = ("api", "ml", "tests", "scripts")`.
 - `def size_violations(root: Path) -> tuple[str, ...]`: for every `*.py` under the scanned directories that exist
   (sorted): `n = len(text.splitlines())`; `n > 300` and the POSIX relative path not exempt →
-  `f"{relative_path}: {n} lines > 300"`; every `ast.ClassDef` with `end_lineno - lineno + 1 > 150` →
+  `f"{relative_path}: {n} lines > 300"`; every `ast.ClassDef` with `(end_lineno or lineno) - lineno + 1 > 150` (`end_lineno` is `int | None` in the type stubs) →
   `f"{relative_path}:{lineno}: class {name} has {count} lines > 150"`.
 
 ## Expected behavior
@@ -122,8 +122,9 @@ Test files do not import each other; each defines its own `REPO_ROOT: Final[Path
 ## Edge cases and error handling
 
 - Until `api/` and `ml/` each hold one `.py` file (specs 002 and 007), Gate step 3 exits 2 (mypy prints
-  `Cannot read file: No such file or directory` for a missing directory, `There are no .py[i] files in directory`
-  for an empty one), and step 5 fails with `Coverage failure: total of 0 is less than fail-under=80` while no module
+  `ml: error: Duplicate module named "__main__" (also at "api")` while both directories are missing,
+  `ml: error: Cannot read file: No such file or directory` when only `ml` is missing, and
+  `There are no .py[i] files in directory 'api'` for an empty directory; the exit code is 2 in all three cases), and step 5 fails with `Coverage failure: total of 0 is less than fail-under=80` while no module
   under `api/` is tested. This is expected; the DoD checks each step separately.
 - `security_grep.sh` with `ROOT` holding no `api`, `ml` or `scripts` directory runs SEC-10, SEC-17 and SEC-18 only.
 - A missing `requirements-dev.txt` makes SEC-18 fail (grep's `No such file or directory` message is the output).

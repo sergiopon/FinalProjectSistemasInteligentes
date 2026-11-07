@@ -30,12 +30,12 @@ Implemented: **1 of 31** specs.
 | # | Spec | Owner | Status |
 |---|---|---|---|
 | 000 | [Tooling and pins](specs/000-tooling-and-pins.md) | Sergio Ponce | Implemented |
-| 001 | [Gate and dependency rule](specs/001-gate-and-dependency-rule.md) | Sergio Ponce | To draft |
-| 002 | [Domain errors and entities](specs/002-domain-errors-entities.md) | Sergio Ponce | To draft |
-| 003 | [Domain safety helpers](specs/003-domain-safety.md) | Sergio Ponce | To draft |
-| 004 | [Domain decision agent](specs/004-domain-decision-agent.md) | Sergio Ponce | To draft |
-| 005 | [Domain clauses and priority](specs/005-domain-clauses-priority.md) | Sergio Ponce | To draft |
-| 006 | [Ports](specs/006-ports.md) | Sergio Ponce | To draft |
+| 001 | [Gate and dependency rule](specs/001-gate-and-dependency-rule.md) | Sergio Ponce | Ready |
+| 002 | [Domain errors and entities](specs/002-domain-errors-entities.md) | Sergio Ponce | Ready |
+| 003 | [Domain safety helpers](specs/003-domain-safety.md) | Sergio Ponce | Ready |
+| 004 | [Domain decision agent](specs/004-domain-decision-agent.md) | Sergio Ponce | Ready |
+| 005 | [Domain clauses and priority](specs/005-domain-clauses-priority.md) | Sergio Ponce | Ready |
+| 006 | [Ports](specs/006-ports.md) | Sergio Ponce | Ready |
 | 007 | [ML data cleaning](specs/007-ml-data-cleaning.md) | Andres Acosta | To draft |
 | 008 | [ML grouped split](specs/008-ml-grouped-split.md) | Andres Acosta | To draft |
 | 009 | [ML representations](specs/009-ml-representations.md) | Andres Acosta | To draft |

@@ -89,12 +89,13 @@ Every entity below is `@dataclass(frozen=True, slots=True)`. "In unit range" mea
 | `WordInfluence` | `word: str`, `delta: float` | `word` blank → `"word is blank"`; not `-1.0 <= delta <= 1.0` → `"delta out of range"` |
 
 Methods (no others):
-- `ClassProbabilities.of(self, polarity: Polarity) -> float` = `(self.negative, self.neutral,
-  self.positive)[POLARITY_ORDER.index(polarity)]`.
-- `ClassProbabilities.top(self) -> Polarity` = `max(POLARITY_ORDER, key=self.of)` (a tie returns the first in
-  `POLARITY_ORDER`).
-- `ConformalSet.is_singleton` (`@property`, `-> bool`) = `len(self.labels) == 1`.
-- `AspectScores.score(self, group: AspectGroup) -> float` = `self.scores[ASPECT_ORDER.index(group)]`.
+- `ClassProbabilities.of(self, polarity: Polarity) -> float` returns `negative` for `Polarity.NEGATIVE`, `neutral`
+  for `Polarity.NEUTRAL` and `positive` for `Polarity.POSITIVE`.
+- `ClassProbabilities.top(self) -> Polarity` returns the polarity with the highest probability; on a tie it returns
+  the one that comes first in `POLARITY_ORDER`.
+- `ConformalSet.is_singleton` (`@property`, `-> bool`) is `True` when `labels` holds exactly 1 element.
+- `AspectScores.score(self, group: AspectGroup) -> float` returns `scores[i]`, where `i` is the position of `group`
+  in `ASPECT_ORDER`.
 
 ### `api/domain/reports.py`
 
@@ -131,6 +132,8 @@ review_count)`, `None` when both are 0. Regex patterns are compiled module const
 - `ConformalSet(frozenset(), 0.9)` is valid (empty set means review).
 - No runtime type check is added beyond the rules listed; wrong types are mypy errors.
 - `AspectScores.present` is not cross-checked against `scores` (thresholds live in the adapter).
+- `ModelInfo.version` uses `re.fullmatch(r"v[0-9]{3}", version)`, which is the ASCII-digit, no-trailing-newline
+  reading of `^v\d{3}$` in `docs/contracts.md` §1.2.
 
 ## Acceptance tests (prose)
 
@@ -155,6 +158,9 @@ ClassProbabilities>, <baseline AspectScores>)`; `WordInfluence("curso", 0.1)`:
 - `test_conformal_set_singleton`: `frozenset({POSITIVE})` → `True`; `frozenset()` → `False`; `frozenset({NEGATIVE, NEUTRAL})` → `False`
   (all at `confidence_level` 0.9).
 - `test_conformal_set_confidence_bounds`: `0.0` and `1.0` → `"confidence_level out of range"`; `0.9` accepted.
+- `test_aspect_scores_present_not_cross_checked`: `AspectScores((0.0,) * 9, frozenset({AspectGroup.CONTENT}))` is
+  built without error and `present == frozenset({AspectGroup.CONTENT})`.
+- `test_conformal_set_empty`: `ConformalSet(frozenset(), 0.9).labels == frozenset()`.
 - `test_aspect_scores_length`: `(0.0,) * 8` with `present=frozenset()` → `"aspect scores must have 9 values"`.
 - `test_aspect_scores_range`: `(0.0,) * 8 + (1.5,)` with `present=frozenset()` → `"aspect score out of range"`.
 - `test_aspect_scores_score`: scores `(0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8)` → `score(AspectGroup.MATERIALS) ==

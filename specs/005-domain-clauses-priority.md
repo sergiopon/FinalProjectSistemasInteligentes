@@ -12,7 +12,7 @@ contract vectors of `docs/contracts.md` §4.2 and §4.3 passing. Use cases (spec
 
 ## Depends on
 
-002 (`api/domain/entities.py`, `api/domain/reports.py`, `api/domain/errors.py`).
+001 (`tests/architecture`, `scripts/security_grep.sh`), 002 (`api/domain/entities.py`, `api/domain/reports.py`, `api/domain/errors.py`). Both MUST be `Implemented` before this spec runs.
 
 ## Governing files
 
@@ -178,6 +178,14 @@ with `==`.
     `InvalidInputError`, `detail` `"duplicate aspect group"`.
 27. `test_min_support_value`: `MIN_SUPPORT == 5`.
 
+Entry comparison: each test in `test_priority.py` builds the expected entries as a list of tuples `(rank, group,
+mentions, negative, prevalence, smoothed_negative_share, score, low_support)` and compares it with the actual entries
+converted by one private helper `_as_tuples(entries: Sequence[PriorityEntry]) -> list[tuple[...]]`. The helper has 1
+parameter. The comparison of the 6 non-float fields uses `==` and of the 3 float fields `pytest.approx(value,
+abs=1e-12)`. `mentions` and `negative` are the values of the input cell of the same group (test 18: content 40 and
+10, assessment 10 and 8, platform 2 and 2). No test function exceeds 20 statements. No docstring or comment in the
+test files uses the word "logging".
+
 ## Out of scope
 
 - Building `AspectCell` counts from analyses and the course report (spec 023).
@@ -192,7 +200,7 @@ with `==`.
 - [ ] `.venv/bin/pytest -q tests/unit/domain/test_priority.py` → `11 passed`, exit code 0.
 - [ ] `.venv/bin/ruff check .` → `All checks passed!`.
 - [ ] `.venv/bin/ruff format --check .` → exit code 0.
-- [ ] `.venv/bin/mypy --strict api ml tests` → `Success: no issues found in N source files`.
+- [ ] `.venv/bin/mypy --strict api tests` → `Success: no issues found in N source files` (`ml/` holds no module until spec 007).
 - [ ] `.venv/bin/pytest -q tests/architecture` → `N passed`.
 - [ ] `.venv/bin/pytest -q -m "not integration" --cov=api --cov=ml --cov-report=term-missing` → the rows of
       `api/domain/clauses.py` and `api/domain/priority.py` show ≥ 80 %.
@@ -203,4 +211,4 @@ with `==`.
 - [ ] `grep -c "MIN_SUPPORT: int = 5" api/domain/priority.py` → `1`.
 - [ ] `grep -n "round(" api/domain/priority.py` → no output.
 - [ ] `bash scripts/security_grep.sh` → no output, exit code 0.
-- [ ] `bash scripts/gate.sh` → last line `GATE OK`, exit code 0.
+- [ ] Gate: not applicable until spec 007: `bash scripts/gate.sh` exits 2 at step 3 (mypy) while `ml/` holds no `.py` file; `GATE OK` is checked once spec 007 is implemented.
