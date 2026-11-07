@@ -83,7 +83,8 @@ method body is its docstring followed by `...`. `str(inspect.signature(Port.meth
    sentence "`texts` holds 1 to 5000 items and every item is non-empty after `strip()`." Text rule: a cell holds one or
    more sentences separated by one space; a `;` inside a cell ends a sentence, and each part is written as its own
    sentence starting with a capital letter and ending with a period; a line longer than 100 characters is broken at
-   the last space before column 100 and continues with the same indentation. Final text of the two mixed cells:
+   the last space that keeps the line at 100 characters or fewer (greedy fill, `textwrap.wrap(width=100)`) and
+   continues with the same indentation. Final text of the two mixed cells:
    `summarize` Preconditions "`texts` holds 1 to 5000 items and every item is non-empty after `strip()`. `k` is in
    1..10."; `compare` Preconditions "`texts` holds 1 to 5000 items and every item is non-empty after `strip()`.
    `body_sha256` is 64 lowercase hex characters. `created_at` is ISO 8601 UTC ending in `Z`."

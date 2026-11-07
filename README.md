@@ -25,7 +25,7 @@ Critical path: 000, 002, 003, 007, 008 and 009, 010, 011, 013, 017, 018, 024, 02
 <!-- progress:start -->
 _Updated 2026-11-07 from `specs/README.md`._
 
-Implemented: **6 of 31** specs.
+Implemented: **7 of 31** specs.
 
 | # | Spec | Owner | Status |
 |---|---|---|---|
@@ -35,7 +35,7 @@ Implemented: **6 of 31** specs.
 | 003 | [Domain safety helpers](specs/003-domain-safety.md) | Sergio Ponce | Implemented |
 | 004 | [Domain decision agent](specs/004-domain-decision-agent.md) | Sergio Ponce | Implemented |
 | 005 | [Domain clauses and priority](specs/005-domain-clauses-priority.md) | Sergio Ponce | Implemented |
-| 006 | [Ports](specs/006-ports.md) | Sergio Ponce | Ready |
+| 006 | [Ports](specs/006-ports.md) | Sergio Ponce | Implemented |
 | 007 | [ML data cleaning](specs/007-ml-data-cleaning.md) | Andres Acosta | To draft |
 | 008 | [ML grouped split](specs/008-ml-grouped-split.md) | Andres Acosta | To draft |
 | 009 | [ML representations](specs/009-ml-representations.md) | Andres Acosta | To draft |
