@@ -143,10 +143,10 @@ With the defaults (5.0, 1.0, true) rule 4 classifies when `p_top >= 0.8`. Test v
 ### 4.2 Clauses and aspect sentiment — `api/domain/clauses.py`
 
 `split_clauses(text: str) -> tuple[str, ...]`:
-1. Split on `[.!?;]+(?=\s|$)`.
+1. Split on `(?<![.!?;])[.!?;]++(?=\s|$)` (possessive, so long punctuation runs stay linear).
 2. Split each piece on the case-insensitive regex `\b(?:pero|aunque|sin embargo|no obstante|mientras que)\b`
    (connector dropped).
-3. Strip each piece of whitespace and of `,;:` at both ends; drop pieces shorter than 3 characters.
+3. Strip each piece of Unicode whitespace (every character `str.isspace()` accepts) and of `,;:` at both ends; drop pieces shorter than 3 characters.
 4. If nothing remains, return `(text.strip(),)`.
 
 Vector: `"El contenido fue claro, pero los parciales fueron difíciles. Sin embargo, buen horario."` →

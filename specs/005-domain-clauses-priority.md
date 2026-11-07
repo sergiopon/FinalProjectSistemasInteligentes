@@ -43,10 +43,10 @@ None new. Standard library modules used: `re`, `string`, `collections.abc`.
 `api.domain.entities` the names `ASPECT_ORDER`, `AspectSentiment`, `ClauseAnalysis`; from `api.domain.errors`
 `InvalidInputError`.
 
-- `_SENTENCE_BOUNDARY: re.Pattern[str] = re.compile(r"[.!?;]+(?=\s|$)")`
+- `_SENTENCE_BOUNDARY: re.Pattern[str] = re.compile(r"(?<![.!?;])[.!?;]++(?=\s|$)")`
 - `_CONNECTOR: re.Pattern[str] = re.compile(r"\b(?:pero|aunque|sin embargo|no obstante|mientras que)\b",
   re.IGNORECASE)` (the flag is passed as `re.IGNORECASE`, not inline).
-- `_STRIP_CHARS: str = string.whitespace + ",;:"`
+- `_STRIP_CHARS: str = string.whitespace + _UNICODE_SPACES + ",;:"`, where `_UNICODE_SPACES: str = "\x1c\x1d\x1e\x1f\x85\xa0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000"` (the characters `str.isspace()` accepts that `string.whitespace` lacks)
 - `_MIN_CLAUSE_CHARS: int = 3`
 - `def split_clauses(text: str) -> tuple[str, ...]`
 - `def aspect_sentiments(clauses: Sequence[ClauseAnalysis]) -> tuple[AspectSentiment, ...]`
@@ -122,6 +122,8 @@ implementer reports its name and the reason.
    buen horario."` → `("El contenido fue claro", "los parciales fueron difíciles", "buen horario")`.
 2. `test_split_clauses_falls_back_when_all_pieces_short`: `"Ok."` → `("Ok.",)`.
 3. `test_split_clauses_strips_whitespace`: `"  Bueno  "` → `("Bueno",)`.
+   `test_split_clauses_strips_unicode_whitespace`: `"Bien.\xa0\xa0\xa0"` (written with escapes: three no-break spaces after the period) → `("Bien",)`; and every character `c` below `chr(0x3100)` with `c.isspace()` is in `_STRIP_CHARS`.
+   `test_split_clauses_long_punctuation_run_is_linear`: `"." * 100000 + "x"` returns in under 1 second.
 4. `test_split_clauses_keeps_decimal_number`: `"Nota 3.5 pero injusta."` → `("Nota 3.5", "injusta")`.
 5. `test_split_clauses_ellipsis_and_uppercase_connector`: `"Bien... PERO lento!"` → `("Bien", "lento")`.
 6. `test_split_clauses_ignores_connector_inside_word`: `"Me dolió el peroné, pero sigo."` →
@@ -196,7 +198,7 @@ test files uses the word "logging".
 ## Definition of Done
 
 - [ ] `.venv/bin/pytest -q -m "not integration"` → `N passed`, exit code 0.
-- [ ] `.venv/bin/pytest -q tests/unit/domain/test_clauses.py` → `18 passed`, exit code 0.
+- [ ] `.venv/bin/pytest -q tests/unit/domain/test_clauses.py` → `20 passed`, exit code 0.
 - [ ] `.venv/bin/pytest -q tests/unit/domain/test_priority.py` → `11 passed`, exit code 0.
 - [ ] `.venv/bin/ruff check .` → `All checks passed!`.
 - [ ] `.venv/bin/ruff format --check .` → exit code 0.
