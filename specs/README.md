@@ -3,7 +3,7 @@
 | # | Spec | Depends on | Status |
 |---|---|---|---|
 | 000 | [Tooling and pins](000-tooling-and-pins.md) | None | Implemented |
-| 001 | [Gate and dependency rule](001-gate-and-dependency-rule.md) | 000 | Ready |
+| 001 | [Gate and dependency rule](001-gate-and-dependency-rule.md) | 000 | Implemented |
 | 002 | [Domain errors and entities](002-domain-errors-entities.md) | 000, 001 | Ready |
 | 003 | [Domain safety helpers](003-domain-safety.md) | 001, 002 | Ready |
 | 004 | [Domain decision agent](004-domain-decision-agent.md) | 001, 002 | Ready |
@@ -40,3 +40,4 @@
 |---|---|---|---|
 | 2026-11-07 | 002 | `CommentAnalysis` moves from `api/domain/entities.py` to `api/domain/decision.py` in `docs/contracts.md` §1.1 | its `decision` field needs `DecisionResult`, and `entities.py` cannot import `decision.py` |
 | 2026-11-07 | 002, 003, 006 | `Depends on` of the index lists 001 as well | the Definition of Done of each spec uses `tests/architecture` and `scripts/security_grep.sh` from spec 001 |
+| 2026-11-07 | 001 | `imported_modules` also emits `api.<name>` for `from api import <name>`; 2 tests added (38 to 40) | the form `from api import adapters` evaded `ARCHITECTURE.md` §2 rules 3 and 4 |

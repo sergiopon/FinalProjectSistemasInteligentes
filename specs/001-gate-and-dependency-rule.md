@@ -80,7 +80,8 @@ SEC-13 adds `--include="*.sh" --exclude=security_grep.sh`, because the script ho
   `"ports"`, `api/application/**` → `"application"`, `api/adapters/**` → `"adapters"`, `api/main.py` → `"main"`,
   `ml/**` → `"ml"`; any other path → `None`.
 - `def imported_modules(path: Path) -> tuple[str, ...]`: parses with `ast.parse`, walks every node (imports under
-  `if TYPE_CHECKING:` count). `import a.b` → `"a.b"` per alias; `from a.b import c` → `"a.b"`; a relative import →
+  `if TYPE_CHECKING:` count). `import a.b` → `"a.b"` per alias; `from a.b import c` → `"a.b"`; `from api import c` (level 0, module exactly `api`)
+  → `"api"` plus `"api.c"` for each alias, so a submodule imported through the package is checked too; a relative import →
   `"." * level + (module or "")`.
 - `def is_allowed(layer: str, module: str) -> bool` with `within(module, package)` meaning `module == package` or
   `module.startswith(package + ".")`, and `stdlib` meaning `module.split(".")[0] in sys.stdlib_module_names`:
@@ -160,6 +161,10 @@ Synthetic trees are written under `tmp_path`; file bodies are one-line strings g
   `import sklearn` → `()`.
 - `test_dependencies_bare_api_import_rejected`: `api/domain/pkg.py` = `from api import domain` →
   `("api/domain/pkg.py: domain must not import api",)`.
+- `test_dependencies_from_api_import_submodule_ml`: `ml/bad.py` = `from api import adapters` →
+  `("ml/bad.py: ml must not import api.adapters",)`.
+- `test_dependencies_from_api_import_main`: `api/adapters/bad.py` = `from api import main` →
+  `("api/adapters/bad.py: adapters must not import api.main",)`.
 - `test_dependencies_syntax_error_propagates`: `api/domain/broken.py` = `def (` → `pytest.raises(SyntaxError)` around
   `dependency_violations(tree)`.
 
@@ -209,9 +214,9 @@ capture_output=True, text=True, check=False)`; the base tree holds copies of the
 
 ## Definition of Done
 
-- [ ] Architecture tests: `.venv/bin/pytest -q tests/architecture` prints `38 passed`, exit code 0 (13 in
+- [ ] Architecture tests: `.venv/bin/pytest -q tests/architecture` prints `40 passed`, exit code 0 (15 in
   `test_dependencies.py`, 6 in `test_size_limits.py`, 19 in `test_security_grep.py`).
-- [ ] Full suite: `.venv/bin/pytest -q -m "not integration"` prints `38 passed`, exit code 0.
+- [ ] Full suite: `.venv/bin/pytest -q -m "not integration"` prints `40 passed`, exit code 0.
 - [ ] Linter: `.venv/bin/ruff check .` prints `All checks passed!`.
 - [ ] Formatter: `.venv/bin/ruff format --check .` exits 0.
 - [ ] Type checker: `.venv/bin/mypy --strict tests` prints `Success: no issues found in 3 source files` (`api` and
