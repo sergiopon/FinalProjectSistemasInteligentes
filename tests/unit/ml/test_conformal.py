@@ -160,7 +160,9 @@ def test_conformal_report_rejects_length_mismatch() -> None:
     assert_invalid("texts and y must have the same non-zero length", info)
 
 
-@pytest.mark.parametrize("y", [np.array([0, 3]), np.array([0, -1])])
+@pytest.mark.parametrize(
+    "y", [np.array([0, 3]), np.array([0, -1]), np.array([0.0, 1.0]), np.array([[0], [1]])]
+)
 def test_conformal_report_rejects_out_of_range_y(y: np.ndarray) -> None:
     with pytest.raises(InvalidInputError) as info:
         conformal_report(StubModel(STUB_SETS), ["t0", "t1"], y)

@@ -143,6 +143,7 @@ def test_parse_aspects_empty_list() -> None:
     ("raw", "detail"),
     [
         ("[{", "aspect list is not valid JSON"),
+        ("[" * 100_000, "aspect list is not valid JSON"),
         ("{}", "aspect list must be a JSON list"),
         ('[{"aspecto": "horario"}]', "aspect entry is malformed"),
         ('["x"]', "aspect entry is malformed"),

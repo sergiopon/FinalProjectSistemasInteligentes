@@ -95,6 +95,12 @@ def test_select_model_vector(s60_result: SelectionResult) -> None:
     assert svm["best_params"] == {"classifier__C": 0.1}
 
 
+def test_select_model_best_params_is_a_copy(s60_result: SelectionResult) -> None:
+    winner = next(row for row in s60_result.selection if row["classifier"] == "extra_trees")
+    assert s60_result.best_params == winner["best_params"]
+    assert s60_result.best_params is not winner["best_params"]
+
+
 def test_select_model_refits_winner(s60_result: SelectionResult) -> None:
     pipeline = s60_result.pipeline
     texts = np.asarray(["bueno curso", "malo curso"], dtype=object)

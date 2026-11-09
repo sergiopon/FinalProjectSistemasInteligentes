@@ -44,3 +44,9 @@ def test_risk_coverage_rejects_length_mismatch() -> None:
     with pytest.raises(InvalidInputError) as info:
         risk_coverage(np.full((2, 3), 1 / 3), np.array([0, 1, 2]))
     assert info.value.detail == "probabilities and y must have the same length"
+
+
+def test_risk_coverage_rejects_non_1d_y() -> None:
+    with pytest.raises(InvalidInputError) as info:
+        risk_coverage(np.full((3, 3), 1 / 3), np.zeros((3, 1), dtype=np.int64))
+    assert info.value.detail == "y must be a 1-D array"

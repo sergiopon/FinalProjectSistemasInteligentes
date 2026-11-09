@@ -124,8 +124,8 @@ unknown-polarity error.
    `list(frame.columns) != list(RAW_COLUMNS)` → columns error.
 3. Rows whose `id` equals `"id"` are dropped (every repeated header, wherever it appears); the remaining rows are
    numbered `n = 1, 2, ...` in file order.
-4. Per row: `row_key = f"{path.name}:{n}"`; `source_file = path.name`; `source_id = int(id)` (`ValueError` → id
-   error); `course = curso` and `semester = semestre` verbatim; `text = normalize_text(feedback)` (`""` → empty-text
+4. Per row: `row_key = f"{path.name}:{n}"`; `source_file = path.name`; `source_id = int(id)` when `id` is only ASCII digits (any
+   other value → id error); `course = curso` and `semester = semestre` verbatim; `text = normalize_text(feedback)` (`""` → empty-text
    error); `polarity = normalize_polarity(polaridad_basica).value`; for each group `g` in `ASPECT_ORDER`,
    `aspect_<g.value>` = the value of `parse_aspects(aspectos)[g]` when present, else `""`. `grano_fino` and
    `emocion` are dropped.
@@ -150,11 +150,11 @@ Every error is `DatasetError` (`api/domain/errors.py`) with this exact `detail` 
 | no `.csv` entry | `"no CSV files in dataset directory"` |
 | undecodable, unterminated or 0-byte CSV | `"dataset file is not a parseable CSV"` |
 | header differs from `RAW_COLUMNS` | `"dataset columns do not match"` |
-| `id` `"x1"` | `"dataset id is not an integer"` |
+| `id` `"x1"`, `"7_0"`, `"-5"`, `" 7"` or a non-ASCII digit | `"dataset id is not an integer"` |
 | `feedback` `"   "` | `"dataset text is empty"` |
 | only header rows in every file | `"dataset has no rows"` |
 | polarity `"mixto"` or `""` | `"unknown polarity label"` |
-| `aspectos` `"[{"` | `"aspect list is not valid JSON"` |
+| `aspectos` `"[{"` or a list nested too deep to parse | `"aspect list is not valid JSON"` |
 | `aspectos` `"{}"` | `"aspect list must be a JSON list"` |
 | item `{"aspecto": "horario"}` or `"x"` (inside a list) | `"aspect entry is malformed"` |
 | label `"comida"` | `"unknown aspect label"` |

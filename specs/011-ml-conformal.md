@@ -138,7 +138,8 @@ All errors are `InvalidInputError` from `api/domain/errors.py`, raised before an
 | `fit_cross_conformal` | fewer than 5 distinct values in `groups` | `"groups must hold at least 5 distinct values"` |
 | `fit_cross_conformal` | `hasattr(pipeline, "predict_proba")` is `False` | `"pipeline must expose predict_proba"` |
 | `conformal_report` | `len(texts) != len(y)` or `len(y) == 0` | `"texts and y must have the same non-zero length"` |
-| `conformal_report` | a value of `y` outside `{0, 1, 2}` | `"y must hold only the class indices 0, 1 and 2"` |
+| `conformal_report` | a value of `y` outside `{0, 1, 2}`, a non-integer dtype or a `y` that is not 1-D | `"y must hold only the class indices 0, 1 and 2"` |
+| `risk_coverage` | `y.ndim != 1` | `"y must be a 1-D array"` |
 | `risk_coverage` | `probabilities.ndim != 2`, `probabilities.shape[1] != 3` or `shape[0] == 0` | `"probabilities must have shape (n, 3) with n >= 1"` |
 | `risk_coverage` | `len(y) != probabilities.shape[0]` | `"probabilities and y must have the same length"` |
 

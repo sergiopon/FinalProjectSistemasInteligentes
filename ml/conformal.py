@@ -81,12 +81,12 @@ def conformal_report(
         ``mean_set_size``, ``singleton_rate`` and ``empty_rate``, as Python floats.
 
     Raises:
-        InvalidInputError: ``texts`` and ``y`` differ in length or are empty, or ``y`` holds a
-            value outside 0, 1 and 2.
+        InvalidInputError: ``texts`` and ``y`` differ in length or are empty, ``y`` is not a 1-D
+            integer array, or ``y`` holds a value outside 0, 1 and 2.
     """
     if len(texts) != len(y) or len(y) == 0:
         raise InvalidInputError("texts and y must have the same non-zero length")
-    if not set(y.tolist()) <= _CLASSES:
+    if y.ndim != 1 or y.dtype.kind not in "iu" or not set(y.tolist()) <= _CLASSES:
         raise InvalidInputError("y must hold only the class indices 0, 1 and 2")
     _, y_set = model.predict_set(np.asarray(texts, dtype=object), agg_scores="mean")
     sets = np.asarray(y_set, dtype=bool)[:, :, 0]
