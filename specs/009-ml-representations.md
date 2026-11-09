@@ -66,10 +66,13 @@ design.
 - `class EmbeddingTransformer(BaseEstimator, TransformerMixin):  # type: ignore[misc]` (the only suppression this
   spec authorizes)
   - `__init__(self, model_name: str, revision: str) -> None`: stores `self.model_name`, `self.revision`, sets
-    `self._model: SentenceTransformer | None = None`. No other work (scikit-learn `clone` contract).
+    `self._slot = _ModelSlot()` (a private holder of the loaded model). No other work (scikit-learn `clone`
+    contract). `_model` is a read-only property returning `self._slot.model`.
   - `fit(self, X: Sequence[str], y: object = None) -> EmbeddingTransformer`
   - `transform(self, X: Sequence[str]) -> np.ndarray`
-  - `__getstate__(self) -> dict[str, object]`
+  - `__sklearn_clone__(self) -> EmbeddingTransformer`: a new transformer with the same parameters that shares this
+    one's `_slot`, so every clone made by `GridSearchCV` or MAPIE uses one loaded model
+  - `_ModelSlot` (private): `model: SentenceTransformer | None`; its `__getstate__` returns `{"model": None}`
 - `download(model_name: str, revision: str) -> None`
 - `main(argv: Sequence[str] | None = None) -> int`
 - Module tail: `if __name__ == "__main__":` then `raise SystemExit(main())`.
@@ -95,10 +98,9 @@ unit tests replace `ml.representations.SentenceTransformer` with `monkeypatch.se
 3. `self._model.encode(list(X), batch_size=EMBEDDING_BATCH_SIZE, show_progress_bar=False, convert_to_numpy=True,
    normalize_embeddings=True)`; a result that is not `np.ndarray` → error; `astype(np.float32)`; shape other than
    `(len(X), EMBEDDING_DIMENSIONS)` → error. Returns rows of L2 norm 1.0 (tolerance 1e-5).
-4. `__getstate__` assigns `state: dict[str, object] = dict(super().__getstate__())` (a new dict; the instance
-   `__dict__` MUST NOT be mutated; the local annotation avoids a `warn_return_any` report on a base of type `Any`),
-   sets `state["_model"] = None` and returns `state`, so a copied or persisted transformer never carries the weights (ADR-003); the next `transform` reloads from the
-   cache.
+4. `_ModelSlot.__getstate__` returns `{"model": None}`, so a copied or persisted transformer never carries the
+   weights (ADR-003); the next `transform` reloads from the cache. Copies made in one object graph (one `deepcopy`
+   or one persisted bundle) keep sharing one slot.
 
 `download(model_name, revision)`: `SentenceTransformer(model_name, revision=revision, device="cpu")` (the only call
 without `local_files_only=True`, SEC-17); logs `INFO` `"embedding_downloaded revision=%s"`.
@@ -162,10 +164,15 @@ holds tests 5 and 7 to 21:
     array"`.
 13. `test_embedding_transform_rejects_bad_shape`: `encode` returns `np.zeros((2, 10))` for 2 texts → `"embedding
     output has an unexpected shape"`.
-14. `test_embedding_state_drops_model`: after one `transform`, `copy.deepcopy(t)._model is None` and
-    `"_model"` maps to `None` in `t.__getstate__()`; `sklearn.base.clone(t)._model is None` with equal `model_name`
-    and `revision`; after both `t.__getstate__()` and `copy.deepcopy(t)`, `t._model` is still the `FakeModel`
-    instance.
+14. `test_embedding_state_drops_model`: after one `transform`, `copy.deepcopy(t)._model is None`;
+    `sklearn.base.clone(t)` has equal `model_name` and `revision`; `t._model` is still the `FakeModel` instance
+    and only one `FakeModel` was built.
+14b. `test_embedding_clones_share_one_model`: clones taken before and after the first `transform`, and a clone of
+    a clone, all `transform` without building a second `FakeModel`; `before_load._model is original._model`.
+14c. `test_embedding_copied_clones_share_one_model_after_loading`: `copy.deepcopy([t, clone(t)])` gives two
+    transformers with no model; after both `transform`, one `FakeModel` exists and both share it; `t._model is None`.
+14d. `test_embedding_independent_transformers_do_not_share`: two transformers built separately build two
+    `FakeModel` instances.
 15. `test_download_uses_network_call`: patched constructor; `download("m", "r")` records args `("m",)` and kwargs
     `{"revision": "r", "device": "cpu"}` (no `local_files_only`).
 16. `test_download_failure`: constructor raises `OSError` → `InferenceError` `"embedding model download failed"`.

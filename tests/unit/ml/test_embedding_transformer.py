@@ -137,12 +137,38 @@ def test_embedding_state_drops_model(calls: Calls) -> None:
     transformer.transform(["uno"])
     loaded = calls.instances[0]
     assert copy.deepcopy(transformer)._model is None
-    assert transformer.__getstate__()["_model"] is None
     cloned = clone(transformer)
-    assert cloned._model is None
     assert cloned.model_name == transformer.model_name
     assert cloned.revision == transformer.revision
     assert transformer._model is loaded
+    assert len(calls.constructed) == 1
+
+
+def test_embedding_clones_share_one_model(calls: Calls) -> None:
+    original = new_transformer()
+    before_load = clone(original)
+    original.transform(["uno"])
+    after_load = clone(original)
+    for twin in (before_load, after_load, clone(after_load)):
+        twin.transform(["dos"])
+    assert len(calls.constructed) == 1
+    assert before_load._model is original._model
+
+
+def test_embedding_copied_clones_share_one_model_after_loading(calls: Calls) -> None:
+    original = new_transformer()
+    first, second = copy.deepcopy([original, clone(original)])
+    first.transform(["uno"])
+    second.transform(["dos"])
+    assert len(calls.constructed) == 1
+    assert first._model is second._model
+    assert original._model is None
+
+
+def test_embedding_independent_transformers_do_not_share(calls: Calls) -> None:
+    new_transformer().transform(["uno"])
+    new_transformer().transform(["uno"])
+    assert len(calls.constructed) == 2
 
 
 def test_download_uses_network_call(calls: Calls) -> None:

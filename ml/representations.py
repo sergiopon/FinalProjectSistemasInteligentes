@@ -30,11 +30,27 @@ SVD_COMPONENTS: Final[int] = 100
 REPRESENTATIONS: Final[tuple[str, ...]] = ("tfidf", "tfidf_svd", "embeddings")
 
 
+class _ModelSlot:
+    """Holder of one loaded model, shared by a transformer and every clone of it.
+
+    It drops the model when copied or persisted, so weights never travel (ADR-003). Transformers
+    copied or persisted in one object graph keep sharing one slot.
+    """
+
+    def __init__(self) -> None:
+        self.model: SentenceTransformer | None = None
+
+    def __getstate__(self) -> dict[str, object]:
+        """Return an empty state: the model is reloaded from the local cache when needed."""
+        return {"model": None}
+
+
 class EmbeddingTransformer(BaseEstimator, TransformerMixin):  # type: ignore[misc]
     """Scikit-learn transformer that encodes texts with a pre-trained sentence-transformers model.
 
     The model loads lazily from the local cache at a pinned revision and is never copied or
-    persisted with the transformer (ADR-003).
+    persisted with the transformer (ADR-003). ``sklearn.base.clone`` returns a twin that shares
+    the loaded model, so cross-validation and conformal folds hold one copy in memory.
 
     Args:
         model_name: Hugging Face model id.
@@ -44,7 +60,18 @@ class EmbeddingTransformer(BaseEstimator, TransformerMixin):  # type: ignore[mis
     def __init__(self, model_name: str, revision: str) -> None:
         self.model_name = model_name
         self.revision = revision
-        self._model: SentenceTransformer | None = None
+        self._slot = _ModelSlot()
+
+    @property
+    def _model(self) -> SentenceTransformer | None:
+        """The loaded model, or ``None`` before the first ``transform``."""
+        return self._slot.model
+
+    def __sklearn_clone__(self) -> EmbeddingTransformer:
+        """Return an unfitted twin with the same parameters that shares this model slot."""
+        twin = EmbeddingTransformer(self.model_name, self.revision)
+        twin._slot = self._slot
+        return twin
 
     def fit(self, X: Sequence[str], y: object = None) -> EmbeddingTransformer:
         """Return the transformer unchanged: the model is pre-trained and learns nothing here.
@@ -88,23 +115,17 @@ class EmbeddingTransformer(BaseEstimator, TransformerMixin):  # type: ignore[mis
             raise InferenceError("embedding output has an unexpected shape")
         return embeddings
 
-    def __getstate__(self) -> dict[str, object]:
-        """Return a copy of the state without the loaded model, so weights never travel."""
-        state: dict[str, object] = dict(super().__getstate__())
-        state["_model"] = None
-        return state
-
     def _load_model(self) -> SentenceTransformer:
         """Load the model from the local cache on first use and keep it."""
-        if self._model is None:
+        if self._slot.model is None:
             try:
-                self._model = SentenceTransformer(
+                self._slot.model = SentenceTransformer(
                     self.model_name, revision=self.revision, local_files_only=True, device="cpu"
                 )
             except OSError as error:
                 raise InferenceError("embedding model is not in the local cache") from error
             logger.info("embedding_model_loaded revision=%s", self.revision)
-        return self._model
+        return self._slot.model
 
 
 def build_representation(name: str) -> TransformerMixin:
