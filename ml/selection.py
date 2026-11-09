@@ -123,7 +123,9 @@ def select_model(texts: Sequence[str], y: np.ndarray, groups: np.ndarray) -> Sel
         "model_selected representation=%s classifier=%s mean=%.4f", representation, classifier, mean
     )
     std = cast("float", winner["cv_macro_f1_std"])
-    return SelectionResult(representation, classifier, best_params, mean, std, fitted, tuple(rows))
+    return SelectionResult(
+        representation, classifier, dict(best_params), mean, std, fitted, tuple(rows)
+    )
 
 
 def _estimator(representation: str, classifier: str) -> object:

@@ -114,10 +114,12 @@ def risk_coverage(probabilities: np.ndarray, y: np.ndarray) -> list[tuple[float,
         ``n`` ``(coverage, risk)`` points as Python floats.
 
     Raises:
-        InvalidInputError: ``probabilities`` is not ``(n, 3)`` with ``n >= 1``, or its row
-            count differs from ``len(y)``.
+        InvalidInputError: ``y`` is not 1-D, ``probabilities`` is not ``(n, 3)`` with
+            ``n >= 1``, or its row count differs from ``len(y)``.
     """
     columns = len(_LABELS)
+    if y.ndim != 1:
+        raise InvalidInputError("y must be a 1-D array")
     if probabilities.ndim != _MATRIX_NDIM or probabilities.shape[1] != columns:
         raise InvalidInputError("probabilities must have shape (n, 3) with n >= 1")
     if probabilities.shape[0] == 0:

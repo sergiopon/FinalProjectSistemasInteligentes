@@ -153,7 +153,7 @@ def parse_aspects(raw: str) -> dict[AspectGroup, Polarity]:
     """
     try:
         entries = json.loads(raw)
-    except json.JSONDecodeError as error:
+    except (json.JSONDecodeError, RecursionError) as error:
         raise DatasetError("aspect list is not valid JSON") from error
     if not isinstance(entries, list):
         raise DatasetError("aspect list must be a JSON list")
@@ -239,11 +239,10 @@ def _clean_file(path: Path) -> list[dict[str, object]]:
 
 
 def _parse_source_id(raw: str) -> int:
-    """Convert the raw ``id`` value to an integer."""
-    try:
-        return int(raw)
-    except ValueError as error:
-        raise DatasetError("dataset id is not an integer") from error
+    """Convert the raw ``id`` value, plain ASCII digits only, to an integer."""
+    if not (raw.isascii() and raw.isdigit()):
+        raise DatasetError("dataset id is not an integer")
+    return int(raw)
 
 
 def _clean_row(file_name: str, number: int, record: dict[str, str]) -> dict[str, object]:

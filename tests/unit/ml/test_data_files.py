@@ -173,6 +173,13 @@ def test_load_dataset_orders_files_by_name(tmp_path: Path) -> None:
             (HEADER + "\n" + ROW_2.replace("7,", "x1,", 1) + "\n").encode(),
             "dataset id is not an integer",
         ),
+        *[
+            (
+                (HEADER + "\n" + ROW_2.replace("7,", f'"{raw_id}",', 1) + "\n").encode(),
+                "dataset id is not an integer",
+            )
+            for raw_id in ("7_0", "\u0663", "-5", "+7", " 7", "7.0")
+        ],
         (
             (
                 HEADER
@@ -183,7 +190,21 @@ def test_load_dataset_orders_files_by_name(tmp_path: Path) -> None:
             "dataset text is empty",
         ),
     ],
-    ids=["undecodable", "empty", "unterminated", "columns", "header_only", "bad_id", "blank_text"],
+    ids=[
+        "undecodable",
+        "empty",
+        "unterminated",
+        "columns",
+        "header_only",
+        "bad_id",
+        "id_underscore",
+        "id_arabic_digit",
+        "id_negative",
+        "id_plus",
+        "id_space",
+        "id_decimal",
+        "blank_text",
+    ],
 )
 def test_load_dataset_rejects_bad_files(tmp_path: Path, content: bytes, detail: str) -> None:
     (tmp_path / "bad.csv").write_bytes(content)
