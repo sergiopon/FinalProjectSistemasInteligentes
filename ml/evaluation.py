@@ -18,6 +18,7 @@ from api.domain.entities import POLARITY_ORDER
 from api.domain.errors import InvalidInputError
 
 _LABELS: Final[list[int]] = [0, 1, 2]
+_MATRIX_NDIM: Final[int] = 2
 
 
 def evaluate(pipeline: Pipeline, texts: Sequence[str], y: np.ndarray) -> dict[str, object]:
@@ -97,6 +98,36 @@ def per_file_macro_f1(
         )
         for name in sorted(set(source_files))
     }
+
+
+def risk_coverage(probabilities: np.ndarray, y: np.ndarray) -> list[tuple[float, float]]:
+    """Risk-coverage curve: error rate when only the most confident rows are classified.
+
+    Rows are ordered by their top probability, descending (ties keep the lower row first); for
+    each ``k`` the point is ``(k / n, errors among the first k / k)``.
+
+    Args:
+        probabilities: Class probabilities, shape ``(n, 3)`` in ``POLARITY_ORDER``.
+        y: True class index of each row.
+
+    Returns:
+        ``n`` ``(coverage, risk)`` points as Python floats.
+
+    Raises:
+        InvalidInputError: ``probabilities`` is not ``(n, 3)`` with ``n >= 1``, or its row
+            count differs from ``len(y)``.
+    """
+    columns = len(_LABELS)
+    if probabilities.ndim != _MATRIX_NDIM or probabilities.shape[1] != columns:
+        raise InvalidInputError("probabilities must have shape (n, 3) with n >= 1")
+    if probabilities.shape[0] == 0:
+        raise InvalidInputError("probabilities must have shape (n, 3) with n >= 1")
+    if len(y) != probabilities.shape[0]:
+        raise InvalidInputError("probabilities and y must have the same length")
+    order = np.argsort(-probabilities.max(axis=1), kind="stable")
+    errors = np.cumsum(probabilities.argmax(axis=1)[order] != np.asarray(y)[order])
+    total = len(y)
+    return [((k + 1) / total, float(errors[k]) / (k + 1)) for k in range(total)]
 
 
 def _validate_labels(texts: Sequence[str], y: np.ndarray) -> None:
