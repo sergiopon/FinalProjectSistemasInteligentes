@@ -13,6 +13,7 @@ from api.domain.entities import (
     Polarity,
     WordInfluence,
 )
+from api.domain.errors import InvalidInputError
 
 DEFAULT_PROBABILITIES: tuple[float, float, float] = (0.1, 0.1, 0.8)
 DEFAULT_SET: frozenset[Polarity] = frozenset({Polarity.POSITIVE})
@@ -95,3 +96,38 @@ class FakeAnonymizer:
     def mask(self, text: str) -> str:
         self.calls.append(text)
         return text.replace("Ana", "[PERSON]")
+
+
+class FakeSummarizer:
+    def __init__(self, empty: bool = False) -> None:
+        self._empty = empty
+        self.calls: list[tuple[tuple[str, ...], int]] = []
+
+    def summarize(self, texts: Sequence[str], k: int) -> tuple[str, ...]:
+        self.calls.append((tuple(texts), k))
+        if self._empty:
+            return ()
+        return tuple(dict.fromkeys(texts))[:k]
+
+
+class FakeTopicModel:
+    def __init__(
+        self,
+        topic_by_text: Mapping[str, int],
+        terms_by_topic: Mapping[int, tuple[str, ...]],
+        short_by: int = 0,
+    ) -> None:
+        self._topic_by_text = topic_by_text
+        self._terms_by_topic = terms_by_topic
+        self._short_by = short_by
+        self.assign_calls: list[tuple[str, ...]] = []
+
+    def assign(self, texts: Sequence[str]) -> tuple[int, ...]:
+        self.assign_calls.append(tuple(texts))
+        results = tuple(self._topic_by_text.get(text, 0) for text in texts)
+        return _drop_last(results, self._short_by)
+
+    def terms(self, topic: int) -> tuple[str, ...]:
+        if topic not in self._terms_by_topic:
+            raise InvalidInputError("unknown topic")
+        return self._terms_by_topic[topic]
