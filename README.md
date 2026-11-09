@@ -23,9 +23,9 @@ Critical path: 000, 002, 003, 007, 008 and 009, 010, 011, 013, 017, 018, 024, 02
 ## Progress
 
 <!-- progress:start -->
-_Updated 2026-11-07 from `specs/README.md`._
+_Updated 2026-11-09 from `specs/README.md`._
 
-Implemented: **7 of 31** specs.
+Implemented: **12 of 31** specs.
 
 | # | Spec | Owner | Status |
 |---|---|---|---|
@@ -36,11 +36,11 @@ Implemented: **7 of 31** specs.
 | 004 | [Domain decision agent](specs/004-domain-decision-agent.md) | Sergio Ponce | Implemented |
 | 005 | [Domain clauses and priority](specs/005-domain-clauses-priority.md) | Sergio Ponce | Implemented |
 | 006 | [Ports](specs/006-ports.md) | Sergio Ponce | Implemented |
-| 007 | [ML data cleaning](specs/007-ml-data-cleaning.md) | Andres Acosta | To draft |
-| 008 | [ML grouped split](specs/008-ml-grouped-split.md) | Andres Acosta | To draft |
-| 009 | [ML representations](specs/009-ml-representations.md) | Andres Acosta | To draft |
-| 010 | [ML model selection](specs/010-ml-model-selection.md) | Andres Acosta | To draft |
-| 011 | [ML conformal](specs/011-ml-conformal.md) | Andres Acosta | To draft |
+| 007 | [ML data cleaning](specs/007-ml-data-cleaning.md) | Andres Acosta | Implemented |
+| 008 | [ML grouped split](specs/008-ml-grouped-split.md) | Andres Acosta | Implemented |
+| 009 | [ML representations](specs/009-ml-representations.md) | Andres Acosta | Implemented |
+| 010 | [ML model selection](specs/010-ml-model-selection.md) | Andres Acosta | Implemented |
+| 011 | [ML conformal](specs/011-ml-conformal.md) | Andres Acosta | Implemented |
 | 012 | [ML aspects and topics](specs/012-ml-aspects.md) | Jose David Ruano | To draft |
 | 013 | [ML artifact and registry](specs/013-ml-artifact-registry.md) | Jose David Ruano | To draft |
 | 014 | [ML train CLI](specs/014-ml-train-cli.md) | Jose David Ruano | To draft |

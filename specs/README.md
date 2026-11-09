@@ -9,11 +9,11 @@
 | 004 | [Domain decision agent](004-domain-decision-agent.md) | 001, 002 | Implemented |
 | 005 | [Domain clauses and priority](005-domain-clauses-priority.md) | 001, 002 | Implemented |
 | 006 | [Ports](006-ports.md) | 001, 002 | Implemented |
-| 007 | [ML data cleaning](007-ml-data-cleaning.md) | 002, 003 | To draft |
-| 008 | [ML grouped split](008-ml-grouped-split.md) | 007 | To draft |
-| 009 | [ML representations](009-ml-representations.md) | 007 | To draft |
-| 010 | [ML model selection](010-ml-model-selection.md) | 008, 009 | To draft |
-| 011 | [ML conformal](011-ml-conformal.md) | 010 | To draft |
+| 007 | [ML data cleaning](007-ml-data-cleaning.md) | 002, 003 | Implemented |
+| 008 | [ML grouped split](008-ml-grouped-split.md) | 007 | Implemented |
+| 009 | [ML representations](009-ml-representations.md) | 007 | Implemented |
+| 010 | [ML model selection](010-ml-model-selection.md) | 008, 009 | Implemented |
+| 011 | [ML conformal](011-ml-conformal.md) | 010 | Implemented |
 | 012 | [ML aspects and topics](012-ml-aspects.md) | 008, 009 | To draft |
 | 013 | [ML artifact and registry](013-ml-artifact-registry.md) | 003, 010, 011, 012 | To draft |
 | 014 | [ML train CLI](014-ml-train-cli.md) | 013 | To draft |
