@@ -25,6 +25,7 @@ bundle (spec 014, `python -m ml.train`).
 3. `tests/fixtures/fake_ports.py` (modify): add `FakeDriftDetector`, `RaisingPolarityModel`, `make_services`.
 4. `tests/unit/test_main.py` (new).
 5. `tests/unit/test_routes.py` (new).
+6. `api/adapters/monitoring.py` (modify): add `utc_now_iso() -> str` (UTC now, `%Y-%m-%dT%H:%M:%SZ`; the only clock read, allowed in adapters by `ARCHITECTURE.md` §6). 7. `tests/unit/adapters/test_monitoring_clock.py` (new): the result matches `^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$`.
 
 ## External dependencies
 None new. Verified at the pins of `CONTEXT.md` (fastapi 0.162.0, starlette 1.10.0, uvicorn 0.54.0, pydantic
@@ -41,21 +42,21 @@ implemented code first and, on any mismatch, stops and reports it without adapti
 | Spec | Name |
 |---|---|
 | 016 | `api.adapters.settings.load_settings(path: Path) -> AppSettings`; fields `costs.error_cost`, `costs.review_cost`, `costs.review_if_set_not_singleton`, `conformal.alpha`, `limits.max_text_chars`, `limits.max_upload_bytes`, `limits.max_upload_rows`, `models_dir: Path` (absolute); `api.adapters.log_config.configure_logging() -> None` |
-| 017-020 | Adapter constructors of `docs/contracts.md` §3; `api.adapters.monitoring.utc_now_iso() -> str` (UTC, `%Y-%m-%dT%H:%M:%SZ`) |
-| 021 | `api.adapters.csv_reader.read_limited_body(chunks: AsyncIterator[bytes], content_length: str \| None, max_bytes: int) -> bytes` (async; `PayloadTooLargeError`); `api.adapters.csv_reader.parse_comments_csv(body: bytes, max_rows: int, max_text_chars: int) -> tuple[Comment, ...]` (`CsvFormatError`, `InvalidInputError`); `api.adapters.http_schemas`: `PredictRequest` (`text`), `PredictResponse.from_analysis(analysis, model_version)`, `BatchResponse.from_results(model_version, analyses, reports)`, `ModelInfoResponse.from_info(info)`, `DriftResponse.from_report(report)`, `MetricsResponse.from_snapshot(snapshot)` |
+| 017-020 | Adapter constructors of `docs/contracts.md` §3. `utc_now_iso` does not exist in spec 020: this spec adds it to `api/adapters/monitoring.py` (files 6 and 7) |
+| 021 | `api.adapters.csv_reader.read_body_limited(chunks: AsyncIterable[bytes], content_length: str \| None, limits: LimitSettings) -> bytes` (async; `PayloadTooLargeError`); `api.adapters.csv_reader.parse_csv_body(body: bytes, limits: LimitSettings) -> tuple[Comment, ...]` (`CsvFormatError`, `InvalidInputError`); `api.adapters.http_schemas`: `PredictRequest` (`text`), `predict_response(analysis, model_version) -> PredictResponse`, `batch_response(analyses, reports, model_version) -> BatchResponse`, `model_info_json(info) -> ModelInfoJson`, `drift_report_json(report) -> DriftReportJson`, `metrics_response(snapshot) -> MetricsResponse`; `LimitSettings` is `api.adapters.settings.LimitSettings` |
 
 `api/routes.py`:
 - `@dataclass(frozen=True, slots=True) class Services:` fields `model_info: ModelInfo`, `analyze_comment:
   AnalyzeComment`, `analyze_batch: AnalyzeBatch`, `course_report: BuildCourseReport`, `drift: DriftDetector`,
-  `metrics: MetricsStore`, `max_upload_bytes: int`, `max_upload_rows: int`, `max_text_chars: int`, `clock:
+  `metrics: MetricsStore`, `limits: LimitSettings`, `clock:
   Callable[[], str]`.
 - `services_of(request: Request) -> Services`: `request.app.state.services` narrowed with `isinstance`; missing or
   other type → `ModelUnavailableError("services not loaded")`.
 - `media_type(request: Request) -> str`: `content-type` header before the first `;`, stripped, lowercase; `""`
   when absent.
 - Endpoints (all `async def`, argument `request: Request` only): `health` → `dict[str, str]`; `model` →
-  `ModelInfoResponse`; `predict` → `PredictResponse`; `predict_batch` → `BatchResponse`; `drift` →
-  `DriftResponse`; `metrics` → `MetricsResponse`.
+  `ModelInfoJson`; `predict` → `PredictResponse`; `predict_batch` → `BatchResponse`; `drift` →
+  `DriftReportJson`; `metrics` → `MetricsResponse`.
 - `build_router() -> APIRouter`: registers with `add_api_route` exactly `GET /health`, `GET /model`, `POST
   /predict`, `POST /predict-batch`, `POST /drift`, `GET /metrics`. No module-level router object.
 
@@ -125,23 +126,23 @@ implemented code first and, on any mismatch, stops and reports it without adapti
 
 Routes (`services = services_of(request)`; `version = services.model_info.version`):
 1. `GET /health` → `{"status": "ok", "model_version": version}`. `GET /model` →
-   `ModelInfoResponse.from_info(services.model_info)`. `GET /metrics` →
-   `MetricsResponse.from_snapshot(services.metrics.snapshot())`.
+   `model_info_json(services.model_info)`. `GET /metrics` →
+   `metrics_response(services.metrics.snapshot())`.
 2. `POST /predict`: `start = time.perf_counter()`; `media_type != "application/json"` →
    `UnsupportedMediaTypeError("predict expects application/json")`; `PredictRequest.model_validate_json(await
    request.body())`, `pydantic.ValidationError` → `InvalidInputError("predict body failed validation")` raised
    `from` it; `analysis = services.analyze_comment.execute(Comment(text=payload.text))`;
    `services.metrics.record("/predict", elapsed_ms, (analysis.decision.decision,))`; returns
-   `PredictResponse.from_analysis(analysis, version)`.
+   `predict_response(analysis, version)`.
 3. `POST /predict-batch`: `media_type != "text/csv"` → `UnsupportedMediaTypeError("expected text/csv")`; `body =
-   await read_limited_body(request.stream(), request.headers.get("content-length"), services.max_upload_bytes)`;
-   `comments = parse_comments_csv(body, services.max_upload_rows, services.max_text_chars)`; `analyses =
+   await read_body_limited(request.stream(), request.headers.get("content-length"), services.limits)`;
+   `comments = parse_csv_body(body, services.limits)`; `analyses =
    analyze_batch.execute(comments)`; `reports = course_report.execute(comments, analyses)` (original texts; masked
    inside, SEC-02); `metrics.record("/predict-batch", elapsed_ms, decisions)`; logs `"batch request_id=%s
-   rows=%d"`; returns `BatchResponse.from_results(version, analyses, reports)`.
+   rows=%d"`; returns `batch_response(analyses, reports, version)`.
 4. `POST /drift`: same media check and body read; `report = drift.compare(tuple(c.text for c in comments),
    hashlib.sha256(body).hexdigest(), services.clock())`; `metrics.record_drift(report)`; returns
-   `DriftResponse.from_report(report)`. No latency record.
+   `drift_report_json(report)`. No latency record.
 The body stays in memory (SEC-01); nothing is written to disk (SEC-03); no log holds text or file names (SEC-05,
 SEC-06).
 
@@ -166,7 +167,7 @@ filtered here.
 `tests/fixtures/fake_ports.py` additions: `FakeDriftDetector` (`compare` returns `DriftReport(body_sha256,
 len(texts), 0.0, 0.0, 0.0, False, created_at)` and records calls); `RaisingPolarityModel(error: Exception)` (both
 methods raise `error`); `make_services(polarity: PolarityModel | None = None, max_upload_bytes: int = 2097152) ->
-Services` with `ModelInfo("v001", "2026-11-05T12:00:00Z", "0" * 64, "logistic_regression", "tfidf", 0.9, 0.61,
+Services` (builds `LimitSettings`) with `ModelInfo("v001", "2026-11-05T12:00:00Z", "0" * 64, "logistic_regression", "tfidf", 0.9, 0.61,
 0.9)`, spec 022 and 023 fakes (topic map empty, terms `{0: ("curso", "clase", "tema", "contenido", "horario")}`),
 `InMemoryMetricsStore()`, `FakeDriftDetector()`, limits 5000 and 2000, clock `"2026-11-05T12:00:00Z"`. Clients are
 `TestClient(build_app(lambda: services, tmp_path / "web"))` used as context manager; `tmp_path / "web" /
