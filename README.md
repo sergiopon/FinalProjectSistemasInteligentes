@@ -124,7 +124,7 @@ Critical path: 000, 002, 003, 007, 008 and 009, 010, 011, 013, 017, 018, 024, 02
 <!-- progress:start -->
 _Updated 2026-11-09 from `specs/README.md`._
 
-Implemented: **24 of 31** specs.
+Implemented: **25 of 31** specs.
 
 | # | Spec | Owner | Status |
 |---|---|---|---|
@@ -142,7 +142,7 @@ Implemented: **24 of 31** specs.
 | 011 | [ML conformal](specs/011-ml-conformal.md) | Andres Acosta | Implemented |
 | 012 | [ML aspects and topics](specs/012-ml-aspects.md) | Jose David Ruano | Implemented |
 | 013 | [ML artifact and registry](specs/013-ml-artifact-registry.md) | Jose David Ruano | Implemented |
-| 014 | [ML train CLI](specs/014-ml-train-cli.md) | Jose David Ruano | Ready |
+| 014 | [ML train CLI](specs/014-ml-train-cli.md) | Jose David Ruano | Implemented |
 | 015 | [ML gold set and agreement](specs/015-ml-gold-agreement.md) | Andres Acosta | To draft |
 | 016 | [Adapters settings and logging](specs/016-adapters-settings-logging.md) | Jose David Ruano | Implemented |
 | 017 | [Adapters model store](specs/017-adapters-model-store.md) | Jose David Ruano | Implemented |

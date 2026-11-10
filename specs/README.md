@@ -16,7 +16,7 @@
 | 011 | [ML conformal](011-ml-conformal.md) | 010 | Implemented |
 | 012 | [ML aspects and topics](012-ml-aspects.md) | 008, 009 | Implemented |
 | 013 | [ML artifact and registry](013-ml-artifact-registry.md) | 003, 010, 011, 012 | Implemented |
-| 014 | [ML train CLI](014-ml-train-cli.md) | 013 | Ready |
+| 014 | [ML train CLI](014-ml-train-cli.md) | 013 | Implemented |
 | 015 | [ML gold set and agreement](015-ml-gold-agreement.md) | 007 | To draft |
 | 016 | [Adapters settings and logging](016-adapters-settings-logging.md) | 003 | Implemented |
 | 017 | [Adapters model store](017-adapters-model-store.md) | 006, 013, 016 | Implemented |
