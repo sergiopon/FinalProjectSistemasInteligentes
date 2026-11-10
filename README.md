@@ -25,7 +25,7 @@ Critical path: 000, 002, 003, 007, 008 and 009, 010, 011, 013, 017, 018, 024, 02
 <!-- progress:start -->
 _Updated 2026-11-09 from `specs/README.md`._
 
-Implemented: **19 of 31** specs.
+Implemented: **23 of 31** specs.
 
 | # | Spec | Owner | Status |
 |---|---|---|---|
@@ -46,14 +46,14 @@ Implemented: **19 of 31** specs.
 | 014 | [ML train CLI](specs/014-ml-train-cli.md) | Jose David Ruano | Ready |
 | 015 | [ML gold set and agreement](specs/015-ml-gold-agreement.md) | Andres Acosta | To draft |
 | 016 | [Adapters settings and logging](specs/016-adapters-settings-logging.md) | Jose David Ruano | Implemented |
-| 017 | [Adapters model store](specs/017-adapters-model-store.md) | Jose David Ruano | Ready |
-| 018 | [Adapters scikit-learn models](specs/018-adapters-sklearn-models.md) | Jose David Ruano | Ready |
+| 017 | [Adapters model store](specs/017-adapters-model-store.md) | Jose David Ruano | Implemented |
+| 018 | [Adapters scikit-learn models](specs/018-adapters-sklearn-models.md) | Jose David Ruano | Implemented |
 | 019 | [Adapters text](specs/019-adapters-text.md) | Jose David Ruano | Implemented |
 | 020 | [Adapters monitoring](specs/020-adapters-monitoring.md) | Felipe Moncada | Implemented |
-| 021 | [Adapters HTTP schemas and CSV](specs/021-adapters-http-csv.md) | Felipe Moncada | Ready |
+| 021 | [Adapters HTTP schemas and CSV](specs/021-adapters-http-csv.md) | Felipe Moncada | Implemented |
 | 022 | [Application analyze](specs/022-application-analyze.md) | Felipe Moncada | Implemented |
 | 023 | [Application course report](specs/023-application-course-report.md) | Felipe Moncada | Implemented |
-| 024 | [API main and routes](specs/024-api-main-routes.md) | Felipe Moncada | Ready |
+| 024 | [API main and routes](specs/024-api-main-routes.md) | Felipe Moncada | Implemented |
 | 025 | [Web single comment](specs/025-web-single-comment.md) | Felipe Moncada | To draft |
 | 026 | [Web batch and heatmap](specs/026-web-batch-heatmap.md) | Felipe Moncada | To draft |
 | 027 | [Web review queue and export](specs/027-web-review-queue-export.md) | Felipe Moncada | To draft |

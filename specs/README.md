@@ -19,14 +19,14 @@
 | 014 | [ML train CLI](014-ml-train-cli.md) | 013 | Ready |
 | 015 | [ML gold set and agreement](015-ml-gold-agreement.md) | 007 | To draft |
 | 016 | [Adapters settings and logging](016-adapters-settings-logging.md) | 003 | Implemented |
-| 017 | [Adapters model store](017-adapters-model-store.md) | 006, 013, 016 | Ready |
-| 018 | [Adapters scikit-learn models](018-adapters-sklearn-models.md) | 006, 017 | Ready |
+| 017 | [Adapters model store](017-adapters-model-store.md) | 006, 013, 016 | Implemented |
+| 018 | [Adapters scikit-learn models](018-adapters-sklearn-models.md) | 006, 017 | Implemented |
 | 019 | [Adapters text](019-adapters-text.md) | 003, 006 | Implemented |
 | 020 | [Adapters monitoring](020-adapters-monitoring.md) | 006 | Implemented |
-| 021 | [Adapters HTTP schemas and CSV](021-adapters-http-csv.md) | 016 | Ready |
+| 021 | [Adapters HTTP schemas and CSV](021-adapters-http-csv.md) | 016 | Implemented |
 | 022 | [Application analyze](022-application-analyze.md) | 004, 005, 006 | Implemented |
 | 023 | [Application course report](023-application-course-report.md) | 022 | Implemented |
-| 024 | [API main and routes](024-api-main-routes.md) | 017, 018, 019, 020, 021, 022, 023 | Ready |
+| 024 | [API main and routes](024-api-main-routes.md) | 017, 018, 019, 020, 021, 022, 023 | Implemented |
 | 025 | [Web single comment](025-web-single-comment.md) | 024 | To draft |
 | 026 | [Web batch and heatmap](026-web-batch-heatmap.md) | 024, 025 | To draft |
 | 027 | [Web review queue and export](027-web-review-queue-export.md) | 025, 026 | To draft |
