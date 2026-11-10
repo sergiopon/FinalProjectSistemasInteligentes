@@ -1,10 +1,109 @@
 # From comment to action
 
-Final project for the Emerging Technologies course. The service reads Spanish course-evaluation comments and returns
-a polarity, a conformal prediction set and a decision: classify the comment or send it to a person for review.
+This project reads Spanish course-evaluation comments and returns, for each one, a polarity (negative, neutral or
+positive), the probability of each class, a conformal prediction set and a decision: classify the comment or send
+it to a person for review. It also scores 9 aspect groups and builds a report per course with an aspect heatmap, a
+priority ranking, topics and anonymized quotes. Everything runs on your machine: one FastAPI process on
+`127.0.0.1` serves the API and a static web page.
 
-The project is built spec by spec. Each spec in `specs/` has one owner, one branch (`feature/NNN-slug`) and is
-merged into `main` with `git merge --no-ff` once its dependencies are integrated.
+## Requirements
+
+Linux, [uv](https://docs.astral.sh/uv/), and Docker with the Compose plugin if you want the container. uv installs
+Python 3.12.14. The network is needed only to install packages, download the embedding model and build the image.
+
+## Install
+
+```bash
+uv venv --python 3.12 --seed .venv
+.venv/bin/pip install -r requirements.txt -r requirements-dev.txt
+.venv/bin/python -m ml.representations --download
+```
+
+The last command downloads `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` at the revision pinned in
+`CONTEXT.md`. After it, nothing else goes to the network.
+
+## Train a model
+
+```bash
+.venv/bin/python -m ml.train
+.venv/bin/python -m ml.artifact verify v001
+```
+
+Training reads `Dataset/`, writes `models/v001/` and makes it the active version in `models/registry.json`. The
+service never trains. `.venv/bin/python -m ml.artifact rollback` returns to the previous version and
+`.venv/bin/python -m ml.artifact activate v001` selects one by name.
+
+## Check the model against people
+
+```bash
+.venv/bin/python -m ml.gold sample
+.venv/bin/python -m ml.gold agreement
+.venv/bin/python -m ml.gold_eval
+```
+
+`sample` writes `gold/sheet_a.csv` and `gold/sheet_b.csv` with the same comments. Two people label them without
+seeing each other's sheet. `agreement` writes Cohen's kappa to `gold/agreement.json`, and `ml.gold_eval` compares
+the active model with the rows where both people agree, in `reports/gold_eval.json`.
+
+## Run the service
+
+```bash
+.venv/bin/uvicorn api.main:app --host 127.0.0.1 --port 8000
+```
+
+Open <http://127.0.0.1:8000/> for the web page.
+
+| Route | What it does |
+|---|---|
+| `GET /health` | Status and active model version |
+| `GET /model` | Metadata and test metrics of the active model |
+| `POST /predict` | Analyzes one comment sent as JSON `{"text": "..."}` |
+| `POST /predict-batch` | Analyzes a CSV body (`text/csv`) with columns `feedback` and `curso` |
+| `POST /drift` | Compares a CSV body with the training data |
+| `GET /metrics` | Latency p50 and p95, decision counts and the last drift report |
+
+## Run with Docker
+
+Train a model first (it is read from `models/`). Run `export UID` if your shell does not export it, then
+`docker compose up --build`, and `bash scripts/smoke_docker.sh` to check it. Compose publishes port 8000 on
+`127.0.0.1` only, and the container runs with your user id.
+
+## Measure inference time
+
+`.venv/bin/python -m scripts.benchmark` loads the active model in the same process, sends 3 warm-up requests per route, then 100 requests to
+`/predict` and 20 requests of 100 rows to `/predict-batch`. It prints p50 and p95 latency in milliseconds as JSON.
+No socket is opened, so the times leave out network cost.
+
+## Limitations
+
+- The data is synthetic. The 618 comments in `Dataset/` come from templates ("El curso fue bastante..." opens 61
+  of them), so these results say little about real student comments.
+- The labels are noisy. The overall polarity matches the sentiment of the comment's own aspects in about half of
+  the rows, and "neutral" often marks a mixed comment. A TF-IDF baseline reached macro-F1 0.62 in 5-fold
+  cross-validation, which is probably near the ceiling these labels allow. This is why the service abstains and
+  sends doubtful comments to review.
+- Aspect labels are incomplete: of 55 comments that mention "diapositiva", 31 carry that aspect. Metrics against
+  these labels count some correct predictions as errors; the gold set gives a cleaner measure.
+- Groups are templates, not authors. The dataset has no author column, so the train and test split keeps clusters
+  of near-identical comments on one side (`docs/adr/ADR-001-grouped-split-by-template-clusters.md`). Two comments
+  by the same person can still fall on both sides.
+- Deployment is local. The service listens on `127.0.0.1` and has no login, so do not expose it on a network.
+
+## Security and ethics
+
+- Comments can contain names. Every comment the API returns in batch rows, quotes, summaries and course reports is
+  anonymized first: person names, emails, phone numbers and id numbers are masked. If the anonymizer cannot load,
+  the service does not start. `/predict` returns your own text unchanged.
+- The service stores nothing. Uploads are read in memory; predictions, counters and the last drift report are lost
+  on restart. Review decisions stay in your browser's local storage.
+- Logs go to stdout and never hold comment text or upload file names.
+- The service loads a model only from `models/`, and only when the SHA-256 of the bundle and the versions of
+  scikit-learn, numpy, joblib and mapie match its manifest. A mismatch stops the process.
+- While it runs, the service makes no network calls. Every response carries a strict Content-Security-Policy and
+  other browser security headers, and the web page builds its content without HTML strings.
+- A predicted label is a suggestion. Comments the model is unsure about go to a review queue, and the gold set,
+  labeled by two people, is what the model is measured against.
+- Do not send real student comments, logs, uploads or model files to external services.
 
 ## Team split
 
