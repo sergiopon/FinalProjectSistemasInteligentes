@@ -143,7 +143,7 @@ Implemented: **25 of 31** specs.
 | 012 | [ML aspects and topics](specs/012-ml-aspects.md) | Jose David Ruano | Implemented |
 | 013 | [ML artifact and registry](specs/013-ml-artifact-registry.md) | Jose David Ruano | Implemented |
 | 014 | [ML train CLI](specs/014-ml-train-cli.md) | Jose David Ruano | Implemented |
-| 015 | [ML gold set and agreement](specs/015-ml-gold-agreement.md) | Andres Acosta | To draft |
+| 015 | [ML gold set and agreement](specs/015-ml-gold-agreement.md) | Andres Acosta | Ready |
 | 016 | [Adapters settings and logging](specs/016-adapters-settings-logging.md) | Jose David Ruano | Implemented |
 | 017 | [Adapters model store](specs/017-adapters-model-store.md) | Jose David Ruano | Implemented |
 | 018 | [Adapters scikit-learn models](specs/018-adapters-sklearn-models.md) | Jose David Ruano | Implemented |
@@ -157,7 +157,7 @@ Implemented: **25 of 31** specs.
 | 026 | [Web batch and heatmap](specs/026-web-batch-heatmap.md) | Felipe Moncada | To draft |
 | 027 | [Web review queue and export](specs/027-web-review-queue-export.md) | Felipe Moncada | To draft |
 | 028 | [Docker and clean environment](specs/028-docker-clean-env.md) | Felipe Moncada | To draft |
-| 029 | [ML gold-set evaluation](specs/029-ml-gold-evaluation.md) | Andres Acosta | To draft |
+| 029 | [ML gold-set evaluation](specs/029-ml-gold-evaluation.md) | Andres Acosta | Ready |
 | 030 | [Benchmark and README](specs/030-benchmark-readme.md) | Sergio Ponce | Implemented |
 <!-- progress:end -->
 
