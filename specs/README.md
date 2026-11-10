@@ -9,11 +9,11 @@
 | 004 | [Domain decision agent](004-domain-decision-agent.md) | 001, 002 | Implemented |
 | 005 | [Domain clauses and priority](005-domain-clauses-priority.md) | 001, 002 | Implemented |
 | 006 | [Ports](006-ports.md) | 001, 002 | Implemented |
-| 007 | [ML data cleaning](007-ml-data-cleaning.md) | 002, 003 | To draft |
-| 008 | [ML grouped split](008-ml-grouped-split.md) | 007 | To draft |
-| 009 | [ML representations](009-ml-representations.md) | 007 | To draft |
-| 010 | [ML model selection](010-ml-model-selection.md) | 008, 009 | To draft |
-| 011 | [ML conformal](011-ml-conformal.md) | 010 | To draft |
+| 007 | [ML data cleaning](007-ml-data-cleaning.md) | 002, 003 | Implemented |
+| 008 | [ML grouped split](008-ml-grouped-split.md) | 007 | Implemented |
+| 009 | [ML representations](009-ml-representations.md) | 007 | Implemented |
+| 010 | [ML model selection](010-ml-model-selection.md) | 008, 009 | Implemented |
+| 011 | [ML conformal](011-ml-conformal.md) | 010 | Implemented |
 | 012 | [ML aspects and topics](012-ml-aspects.md) | 008, 009 | To draft |
 | 013 | [ML artifact and registry](013-ml-artifact-registry.md) | 003, 010, 011, 012 | To draft |
 | 014 | [ML train CLI](014-ml-train-cli.md) | 013 | To draft |
@@ -44,3 +44,5 @@
 | 2026-11-07 | 003 | `EMAIL_PATTERN` bounds its local part to 64 and its domain to 255 characters (also in `docs/contracts.md` §4.4); the word-boundary condition of `PHONE_PATTERN` moves into `_mask_phone` for matches without separator; 5 tests added (49 to 54) | the email pattern took quadratic time on long tokens (7.6 s for 100000 characters) and the phone pattern masked digit runs inside hex request ids; the lookbehind and boundary variants left adjacent emails and glued phones unmasked |
 | 2026-11-07 | 005 | `_SENTENCE_BOUNDARY` becomes `(?<![.!?;])[.!?;]++(?=\s|$)`; `_STRIP_CHARS` adds the Unicode spaces `str.isspace()` accepts (both also in `docs/contracts.md` §4.2); 2 tests added (18 to 20) | a comment ending in no-break spaces produced a blank clause that made `ClauseAnalysis` raise; a 2000-character punctuation run took 38 ms in the sentence regex |
 | 2026-11-07 | 006 | line-break rule of the port docstrings reads "last space that keeps the line at 100 characters or fewer (greedy fill)" | the old wording ("before column 100") contradicted "every line ≤ 100 characters" and gave a one-word third line for `compare` |
+| 2026-11-09 | 007, 010, 011 | `_parse_source_id` accepts only ASCII digits; `parse_aspects` also maps `RecursionError` to the JSON error; `risk_coverage` rejects a non-1-D `y` (`"y must be a 1-D array"`, checked first); `conformal_report` rejects a non-integer or non-1-D `y`; `SelectionResult.best_params` is a copy; 11 tests added | review of the merged specs: `int()` accepted `"7_0"` and a non-ASCII digit; a deeply nested aspect cell ended the CLI with `internal_error`; a `(n, 1)` `y` gave a wrong curve silently; a float `y` raised `IndexError`; the result and the table row shared one dict |
+| 2026-11-09 | 009 | `EmbeddingTransformer` keeps its model in a private `_ModelSlot` that `__sklearn_clone__` shares with every clone; `__getstate__` moves to the slot; tests 14b to 14d added (3 tests) | review of the merged specs: `GridSearchCV` and MAPIE clone the pipeline, and each clone loaded its own copy of the embedding model (6 copies, about 2.1 GB, for a cross-conformal embeddings model); a real conformal fit on 200 rows now builds the model once |
