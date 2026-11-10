@@ -17,7 +17,7 @@
 | 012 | [ML aspects and topics](012-ml-aspects.md) | 008, 009 | Implemented |
 | 013 | [ML artifact and registry](013-ml-artifact-registry.md) | 003, 010, 011, 012 | Implemented |
 | 014 | [ML train CLI](014-ml-train-cli.md) | 013 | Implemented |
-| 015 | [ML gold set and agreement](015-ml-gold-agreement.md) | 007 | Ready |
+| 015 | [ML gold set and agreement](015-ml-gold-agreement.md) | 007 | Implemented |
 | 016 | [Adapters settings and logging](016-adapters-settings-logging.md) | 003 | Implemented |
 | 017 | [Adapters model store](017-adapters-model-store.md) | 006, 013, 016 | Implemented |
 | 018 | [Adapters scikit-learn models](018-adapters-sklearn-models.md) | 006, 017 | Implemented |
@@ -31,7 +31,7 @@
 | 026 | [Web batch and heatmap](026-web-batch-heatmap.md) | 024, 025 | To draft |
 | 027 | [Web review queue and export](027-web-review-queue-export.md) | 025, 026 | To draft |
 | 028 | [Docker and clean environment](028-docker-clean-env.md) | 024 | To draft |
-| 029 | [ML gold-set evaluation](029-ml-gold-evaluation.md) | 013, 015 | Ready |
+| 029 | [ML gold-set evaluation](029-ml-gold-evaluation.md) | 013, 015 | Implemented |
 | 030 | [Benchmark and README](030-benchmark-readme.md) | 024 | Implemented |
 
 ## Corrections
