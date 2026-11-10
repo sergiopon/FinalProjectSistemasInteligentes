@@ -1,0 +1,57 @@
+{
+  "best_params": {
+    "classifier__min_samples_leaf": 3
+  },
+  "bundle_sha256": "5b83836f369bc7de4bcbec01dfdee38aa4f532ce3bdf7a27ab03dd064d82eb5a",
+  "confidence_level": 0.9,
+  "created_at": "2026-11-10T03:21:05Z",
+  "dataset_sha256": "5e3ac133828878229457420245bd2d674fdfe985e5a13632bf97b35bdbf2f666",
+  "embedding": {
+    "model_name": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+    "revision": "e8f8c211226b894fcb81acc59f3b34ba3efd5f42"
+  },
+  "library_versions": {
+    "joblib": "1.6.0",
+    "mapie": "1.6.0",
+    "numpy": "2.5.4",
+    "pandas": "3.1.1",
+    "scikit-learn": "1.9.1",
+    "scipy": "1.18.1",
+    "sentence-transformers": "6.2.0",
+    "spacy": "3.8.18",
+    "torch": "2.15.0+cpu"
+  },
+  "metrics": {
+    "empirical_coverage": 0.9516129032258065,
+    "test_macro_f1": 0.732793198299575
+  },
+  "polarity_model": "extra_trees",
+  "python_version": "3.12.14",
+  "representation": "embeddings",
+  "seed": 42,
+  "smoke": {
+    "probabilities": [
+      [
+        0.03370971788329954,
+        0.2552080382254064,
+        0.7110822438912934
+      ],
+      [
+        0.6116053647012553,
+        0.29996567054596945,
+        0.08842896475277516
+      ],
+      [
+        0.32358495920918373,
+        0.4755034952906067,
+        0.20091154550020973
+      ]
+    ],
+    "texts": [
+      "El curso fue excelente y las clases muy claras.",
+      "Los parciales fueron injustos y la retroalimentación llegó tarde.",
+      "El contenido estuvo bien, aunque el horario fue incómodo."
+    ]
+  },
+  "version": "v001"
+}

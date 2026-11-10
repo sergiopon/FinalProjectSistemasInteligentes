@@ -1,0 +1,1065 @@
+{
+  "aspects": {
+    "assessment": {
+      "f1": 0.5098039215686274,
+      "precision": 0.4482758620689655,
+      "recall": 0.5909090909090909,
+      "threshold": 0.45
+    },
+    "communication_climate": {
+      "f1": 0.8571428571428571,
+      "precision": 0.75,
+      "recall": 1.0,
+      "threshold": 0.4
+    },
+    "content": {
+      "f1": 0.7537688442211056,
+      "precision": 0.6048387096774194,
+      "recall": 1.0,
+      "threshold": 0.1
+    },
+    "feedback": {
+      "f1": 0.46153846153846156,
+      "precision": 0.42857142857142855,
+      "recall": 0.5,
+      "threshold": 0.4
+    },
+    "materials": {
+      "f1": 0.3333333333333333,
+      "precision": 0.28,
+      "recall": 0.4117647058823529,
+      "threshold": 0.4
+    },
+    "methodology_clarity": {
+      "f1": 0.08695652173913043,
+      "precision": 0.09090909090909091,
+      "recall": 0.08333333333333333,
+      "threshold": 0.45
+    },
+    "organization_schedule": {
+      "f1": 0.8,
+      "precision": 0.7692307692307693,
+      "recall": 0.8333333333333334,
+      "threshold": 0.4
+    },
+    "platform": {
+      "f1": 0.2,
+      "precision": 0.14285714285714285,
+      "recall": 0.3333333333333333,
+      "threshold": 0.4
+    },
+    "workload_pace": {
+      "f1": 0.3333333333333333,
+      "precision": 0.21428571428571427,
+      "recall": 0.75,
+      "threshold": 0.3
+    }
+  },
+  "conformal": {
+    "empirical_coverage": 0.9516129032258065,
+    "empty_rate": 0.0,
+    "mean_set_size": 1.7580645161290323,
+    "singleton_rate": 0.25806451612903225
+  },
+  "per_file_macro_f1": {
+    "feedback_curso_universitario.csv": 0.6932573599240266,
+    "feedback_curso_universitario2.csv": 0.7074074074074074,
+    "feedback_curso_universitario3.csv": 0.2222222222222222
+  },
+  "risk_coverage": [
+    [
+      0.008064516129032258,
+      0.0
+    ],
+    [
+      0.016129032258064516,
+      0.0
+    ],
+    [
+      0.024193548387096774,
+      0.0
+    ],
+    [
+      0.03225806451612903,
+      0.0
+    ],
+    [
+      0.04032258064516129,
+      0.0
+    ],
+    [
+      0.04838709677419355,
+      0.0
+    ],
+    [
+      0.056451612903225805,
+      0.0
+    ],
+    [
+      0.06451612903225806,
+      0.0
+    ],
+    [
+      0.07258064516129033,
+      0.0
+    ],
+    [
+      0.08064516129032258,
+      0.0
+    ],
+    [
+      0.08870967741935484,
+      0.0
+    ],
+    [
+      0.0967741935483871,
+      0.0
+    ],
+    [
+      0.10483870967741936,
+      0.0
+    ],
+    [
+      0.11290322580645161,
+      0.0
+    ],
+    [
+      0.12096774193548387,
+      0.0
+    ],
+    [
+      0.12903225806451613,
+      0.0
+    ],
+    [
+      0.13709677419354838,
+      0.0
+    ],
+    [
+      0.14516129032258066,
+      0.0
+    ],
+    [
+      0.1532258064516129,
+      0.0
+    ],
+    [
+      0.16129032258064516,
+      0.0
+    ],
+    [
+      0.1693548387096774,
+      0.0
+    ],
+    [
+      0.1774193548387097,
+      0.045454545454545456
+    ],
+    [
+      0.18548387096774194,
+      0.043478260869565216
+    ],
+    [
+      0.1935483870967742,
+      0.041666666666666664
+    ],
+    [
+      0.20161290322580644,
+      0.04
+    ],
+    [
+      0.20967741935483872,
+      0.07692307692307693
+    ],
+    [
+      0.21774193548387097,
+      0.07407407407407407
+    ],
+    [
+      0.22580645161290322,
+      0.10714285714285714
+    ],
+    [
+      0.23387096774193547,
+      0.10344827586206896
+    ],
+    [
+      0.24193548387096775,
+      0.1
+    ],
+    [
+      0.25,
+      0.0967741935483871
+    ],
+    [
+      0.25806451612903225,
+      0.09375
+    ],
+    [
+      0.2661290322580645,
+      0.09090909090909091
+    ],
+    [
+      0.27419354838709675,
+      0.08823529411764706
+    ],
+    [
+      0.28225806451612906,
+      0.08571428571428572
+    ],
+    [
+      0.2903225806451613,
+      0.08333333333333333
+    ],
+    [
+      0.29838709677419356,
+      0.08108108108108109
+    ],
+    [
+      0.3064516129032258,
+      0.07894736842105263
+    ],
+    [
+      0.31451612903225806,
+      0.07692307692307693
+    ],
+    [
+      0.3225806451612903,
+      0.075
+    ],
+    [
+      0.33064516129032256,
+      0.07317073170731707
+    ],
+    [
+      0.3387096774193548,
+      0.07142857142857142
+    ],
+    [
+      0.3467741935483871,
+      0.09302325581395349
+    ],
+    [
+      0.3548387096774194,
+      0.09090909090909091
+    ],
+    [
+      0.3629032258064516,
+      0.08888888888888889
+    ],
+    [
+      0.3709677419354839,
+      0.08695652173913043
+    ],
+    [
+      0.3790322580645161,
+      0.0851063829787234
+    ],
+    [
+      0.3870967741935484,
+      0.08333333333333333
+    ],
+    [
+      0.3951612903225806,
+      0.10204081632653061
+    ],
+    [
+      0.4032258064516129,
+      0.1
+    ],
+    [
+      0.4112903225806452,
+      0.09803921568627451
+    ],
+    [
+      0.41935483870967744,
+      0.09615384615384616
+    ],
+    [
+      0.4274193548387097,
+      0.09433962264150944
+    ],
+    [
+      0.43548387096774194,
+      0.09259259259259259
+    ],
+    [
+      0.4435483870967742,
+      0.09090909090909091
+    ],
+    [
+      0.45161290322580644,
+      0.08928571428571429
+    ],
+    [
+      0.4596774193548387,
+      0.08771929824561403
+    ],
+    [
+      0.46774193548387094,
+      0.08620689655172414
+    ],
+    [
+      0.47580645161290325,
+      0.0847457627118644
+    ],
+    [
+      0.4838709677419355,
+      0.08333333333333333
+    ],
+    [
+      0.49193548387096775,
+      0.08196721311475409
+    ],
+    [
+      0.5,
+      0.08064516129032258
+    ],
+    [
+      0.5080645161290323,
+      0.07936507936507936
+    ],
+    [
+      0.5161290322580645,
+      0.09375
+    ],
+    [
+      0.5241935483870968,
+      0.1076923076923077
+    ],
+    [
+      0.532258064516129,
+      0.12121212121212122
+    ],
+    [
+      0.5403225806451613,
+      0.11940298507462686
+    ],
+    [
+      0.5483870967741935,
+      0.1323529411764706
+    ],
+    [
+      0.5564516129032258,
+      0.13043478260869565
+    ],
+    [
+      0.5645161290322581,
+      0.14285714285714285
+    ],
+    [
+      0.5725806451612904,
+      0.14084507042253522
+    ],
+    [
+      0.5806451612903226,
+      0.1388888888888889
+    ],
+    [
+      0.5887096774193549,
+      0.1506849315068493
+    ],
+    [
+      0.5967741935483871,
+      0.14864864864864866
+    ],
+    [
+      0.6048387096774194,
+      0.16
+    ],
+    [
+      0.6129032258064516,
+      0.17105263157894737
+    ],
+    [
+      0.6209677419354839,
+      0.18181818181818182
+    ],
+    [
+      0.6290322580645161,
+      0.1794871794871795
+    ],
+    [
+      0.6370967741935484,
+      0.17721518987341772
+    ],
+    [
+      0.6451612903225806,
+      0.175
+    ],
+    [
+      0.6532258064516129,
+      0.18518518518518517
+    ],
+    [
+      0.6612903225806451,
+      0.18292682926829268
+    ],
+    [
+      0.6693548387096774,
+      0.18072289156626506
+    ],
+    [
+      0.6774193548387096,
+      0.17857142857142858
+    ],
+    [
+      0.6854838709677419,
+      0.17647058823529413
+    ],
+    [
+      0.6935483870967742,
+      0.18604651162790697
+    ],
+    [
+      0.7016129032258065,
+      0.1839080459770115
+    ],
+    [
+      0.7096774193548387,
+      0.18181818181818182
+    ],
+    [
+      0.717741935483871,
+      0.19101123595505617
+    ],
+    [
+      0.7258064516129032,
+      0.2
+    ],
+    [
+      0.7338709677419355,
+      0.2087912087912088
+    ],
+    [
+      0.7419354838709677,
+      0.20652173913043478
+    ],
+    [
+      0.75,
+      0.21505376344086022
+    ],
+    [
+      0.7580645161290323,
+      0.2127659574468085
+    ],
+    [
+      0.7661290322580645,
+      0.21052631578947367
+    ],
+    [
+      0.7741935483870968,
+      0.20833333333333334
+    ],
+    [
+      0.782258064516129,
+      0.20618556701030927
+    ],
+    [
+      0.7903225806451613,
+      0.20408163265306123
+    ],
+    [
+      0.7983870967741935,
+      0.21212121212121213
+    ],
+    [
+      0.8064516129032258,
+      0.21
+    ],
+    [
+      0.8145161290322581,
+      0.21782178217821782
+    ],
+    [
+      0.8225806451612904,
+      0.22549019607843138
+    ],
+    [
+      0.8306451612903226,
+      0.22330097087378642
+    ],
+    [
+      0.8387096774193549,
+      0.22115384615384615
+    ],
+    [
+      0.8467741935483871,
+      0.21904761904761905
+    ],
+    [
+      0.8548387096774194,
+      0.22641509433962265
+    ],
+    [
+      0.8629032258064516,
+      0.2336448598130841
+    ],
+    [
+      0.8709677419354839,
+      0.24074074074074073
+    ],
+    [
+      0.8790322580645161,
+      0.23853211009174313
+    ],
+    [
+      0.8870967741935484,
+      0.23636363636363636
+    ],
+    [
+      0.8951612903225806,
+      0.23423423423423423
+    ],
+    [
+      0.9032258064516129,
+      0.24107142857142858
+    ],
+    [
+      0.9112903225806451,
+      0.23893805309734514
+    ],
+    [
+      0.9193548387096774,
+      0.24561403508771928
+    ],
+    [
+      0.9274193548387096,
+      0.25217391304347825
+    ],
+    [
+      0.9354838709677419,
+      0.25
+    ],
+    [
+      0.9435483870967742,
+      0.2564102564102564
+    ],
+    [
+      0.9516129032258065,
+      0.2627118644067797
+    ],
+    [
+      0.9596774193548387,
+      0.2689075630252101
+    ],
+    [
+      0.967741935483871,
+      0.26666666666666666
+    ],
+    [
+      0.9758064516129032,
+      0.2644628099173554
+    ],
+    [
+      0.9838709677419355,
+      0.26229508196721313
+    ],
+    [
+      0.9919354838709677,
+      0.2682926829268293
+    ],
+    [
+      1.0,
+      0.27419354838709675
+    ]
+  ],
+  "selection": [
+    {
+      "best_params": {},
+      "classifier": "dummy",
+      "cv_macro_f1_mean": 0.19686292222455087,
+      "cv_macro_f1_std": 0.0009321931451828474,
+      "representation": "tfidf"
+    },
+    {
+      "best_params": {
+        "classifier__C": 0.1
+      },
+      "classifier": "logistic_regression",
+      "cv_macro_f1_mean": 0.6077948909167692,
+      "cv_macro_f1_std": 0.05713202469076163,
+      "representation": "tfidf"
+    },
+    {
+      "best_params": {
+        "classifier__C": 0.1
+      },
+      "classifier": "linear_svm",
+      "cv_macro_f1_mean": 0.6043924853783252,
+      "cv_macro_f1_std": 0.07635863032198116,
+      "representation": "tfidf"
+    },
+    {
+      "best_params": {
+        "classifier__alpha": 0.5
+      },
+      "classifier": "naive_bayes",
+      "cv_macro_f1_mean": 0.6050331459379572,
+      "cv_macro_f1_std": 0.05745112060185833,
+      "representation": "tfidf"
+    },
+    {
+      "best_params": {
+        "classifier__min_samples_leaf": 3
+      },
+      "classifier": "random_forest",
+      "cv_macro_f1_mean": 0.6028047884341563,
+      "cv_macro_f1_std": 0.02776339732600183,
+      "representation": "tfidf"
+    },
+    {
+      "best_params": {
+        "classifier__min_samples_leaf": 3
+      },
+      "classifier": "extra_trees",
+      "cv_macro_f1_mean": 0.6289815596265474,
+      "cv_macro_f1_std": 0.04931064208616039,
+      "representation": "tfidf"
+    },
+    {
+      "best_params": {
+        "classifier__n_neighbors": 25
+      },
+      "classifier": "knn",
+      "cv_macro_f1_mean": 0.5271357693012169,
+      "cv_macro_f1_std": 0.04226918786808042,
+      "representation": "tfidf"
+    },
+    {
+      "best_params": {
+        "classifier__alpha": 0.001
+      },
+      "classifier": "sgd_log_loss",
+      "cv_macro_f1_mean": 0.6001716919573827,
+      "cv_macro_f1_std": 0.05639036609718363,
+      "representation": "tfidf"
+    },
+    {
+      "best_params": {},
+      "classifier": "dummy",
+      "cv_macro_f1_mean": 0.19686292222455087,
+      "cv_macro_f1_std": 0.0009321931451828474,
+      "representation": "tfidf_svd"
+    },
+    {
+      "best_params": {
+        "classifier__C": 1.0
+      },
+      "classifier": "logistic_regression",
+      "cv_macro_f1_mean": 0.5880567033296397,
+      "cv_macro_f1_std": 0.06284584241163303,
+      "representation": "tfidf_svd"
+    },
+    {
+      "best_params": {
+        "classifier__C": 0.1
+      },
+      "classifier": "linear_svm",
+      "cv_macro_f1_mean": 0.6061755346942876,
+      "cv_macro_f1_std": 0.04943540510165468,
+      "representation": "tfidf_svd"
+    },
+    {
+      "best_params": {
+        "classifier__var_smoothing": 1e-09
+      },
+      "classifier": "naive_bayes",
+      "cv_macro_f1_mean": 0.4980655187074482,
+      "cv_macro_f1_std": 0.05065509951699475,
+      "representation": "tfidf_svd"
+    },
+    {
+      "best_params": {
+        "classifier__min_samples_leaf": 3
+      },
+      "classifier": "random_forest",
+      "cv_macro_f1_mean": 0.5309446874299777,
+      "cv_macro_f1_std": 0.04790554906165895,
+      "representation": "tfidf_svd"
+    },
+    {
+      "best_params": {
+        "classifier__min_samples_leaf": 3
+      },
+      "classifier": "extra_trees",
+      "cv_macro_f1_mean": 0.503619278228253,
+      "cv_macro_f1_std": 0.07984751079099837,
+      "representation": "tfidf_svd"
+    },
+    {
+      "best_params": {
+        "classifier__n_neighbors": 15
+      },
+      "classifier": "knn",
+      "cv_macro_f1_mean": 0.47412712260070017,
+      "cv_macro_f1_std": 0.06906006179378689,
+      "representation": "tfidf_svd"
+    },
+    {
+      "best_params": {
+        "classifier__alpha": 0.001
+      },
+      "classifier": "sgd_log_loss",
+      "cv_macro_f1_mean": 0.5793234711723827,
+      "cv_macro_f1_std": 0.05628438226286743,
+      "representation": "tfidf_svd"
+    },
+    {
+      "best_params": {},
+      "classifier": "dummy",
+      "cv_macro_f1_mean": 0.19686292222455087,
+      "cv_macro_f1_std": 0.0009321931451828474,
+      "representation": "embeddings"
+    },
+    {
+      "best_params": {
+        "classifier__C": 10.0
+      },
+      "classifier": "logistic_regression",
+      "cv_macro_f1_mean": 0.674772032596177,
+      "cv_macro_f1_std": 0.05033248816301713,
+      "representation": "embeddings"
+    },
+    {
+      "best_params": {
+        "classifier__C": 1.0
+      },
+      "classifier": "linear_svm",
+      "cv_macro_f1_mean": 0.6851311086796654,
+      "cv_macro_f1_std": 0.04636383466891964,
+      "representation": "embeddings"
+    },
+    {
+      "best_params": {
+        "classifier__var_smoothing": 1e-09
+      },
+      "classifier": "naive_bayes",
+      "cv_macro_f1_mean": 0.6653975384847849,
+      "cv_macro_f1_std": 0.03770985209820989,
+      "representation": "embeddings"
+    },
+    {
+      "best_params": {
+        "classifier__min_samples_leaf": 3
+      },
+      "classifier": "random_forest",
+      "cv_macro_f1_mean": 0.6774146276010247,
+      "cv_macro_f1_std": 0.04013015683685208,
+      "representation": "embeddings"
+    },
+    {
+      "best_params": {
+        "classifier__min_samples_leaf": 3
+      },
+      "classifier": "extra_trees",
+      "cv_macro_f1_mean": 0.6774868741708636,
+      "cv_macro_f1_std": 0.042676029571205115,
+      "representation": "embeddings"
+    },
+    {
+      "best_params": {
+        "classifier__n_neighbors": 25
+      },
+      "classifier": "knn",
+      "cv_macro_f1_mean": 0.6562270882238975,
+      "cv_macro_f1_std": 0.05167829400293268,
+      "representation": "embeddings"
+    },
+    {
+      "best_params": {
+        "classifier__alpha": 0.0001
+      },
+      "classifier": "sgd_log_loss",
+      "cv_macro_f1_mean": 0.657902960250744,
+      "cv_macro_f1_std": 0.03641738610483424,
+      "representation": "embeddings"
+    }
+  ],
+  "split": {
+    "groups": 380,
+    "test_rows": 124,
+    "train_rows": 494
+  },
+  "test": {
+    "accuracy": 0.7258064516129032,
+    "confusion_matrix": [
+      [
+        32,
+        8,
+        1
+      ],
+      [
+        12,
+        34,
+        6
+      ],
+      [
+        1,
+        6,
+        24
+      ]
+    ],
+    "macro_f1": 0.732793198299575,
+    "macro_precision": 0.7312126642771805,
+    "macro_recall": 0.7361758357037665,
+    "per_class": {
+      "negative": {
+        "f1": 0.7441860465116279,
+        "precision": 0.7111111111111111,
+        "recall": 0.7804878048780488,
+        "support": 41
+      },
+      "neutral": {
+        "f1": 0.68,
+        "precision": 0.7083333333333334,
+        "recall": 0.6538461538461539,
+        "support": 52
+      },
+      "positive": {
+        "f1": 0.7741935483870968,
+        "precision": 0.7741935483870968,
+        "recall": 0.7741935483870968,
+        "support": 31
+      }
+    }
+  },
+  "test_row_keys": [
+    "feedback_curso_universitario.csv:2",
+    "feedback_curso_universitario.csv:6",
+    "feedback_curso_universitario.csv:11",
+    "feedback_curso_universitario.csv:18",
+    "feedback_curso_universitario.csv:19",
+    "feedback_curso_universitario.csv:22",
+    "feedback_curso_universitario.csv:27",
+    "feedback_curso_universitario.csv:32",
+    "feedback_curso_universitario.csv:33",
+    "feedback_curso_universitario.csv:37",
+    "feedback_curso_universitario.csv:40",
+    "feedback_curso_universitario.csv:59",
+    "feedback_curso_universitario.csv:61",
+    "feedback_curso_universitario.csv:62",
+    "feedback_curso_universitario.csv:67",
+    "feedback_curso_universitario.csv:78",
+    "feedback_curso_universitario.csv:83",
+    "feedback_curso_universitario.csv:86",
+    "feedback_curso_universitario.csv:87",
+    "feedback_curso_universitario.csv:89",
+    "feedback_curso_universitario.csv:95",
+    "feedback_curso_universitario.csv:98",
+    "feedback_curso_universitario.csv:100",
+    "feedback_curso_universitario.csv:104",
+    "feedback_curso_universitario.csv:108",
+    "feedback_curso_universitario.csv:113",
+    "feedback_curso_universitario.csv:116",
+    "feedback_curso_universitario.csv:117",
+    "feedback_curso_universitario.csv:125",
+    "feedback_curso_universitario.csv:131",
+    "feedback_curso_universitario.csv:134",
+    "feedback_curso_universitario.csv:141",
+    "feedback_curso_universitario.csv:143",
+    "feedback_curso_universitario.csv:144",
+    "feedback_curso_universitario.csv:145",
+    "feedback_curso_universitario.csv:148",
+    "feedback_curso_universitario.csv:152",
+    "feedback_curso_universitario.csv:155",
+    "feedback_curso_universitario.csv:156",
+    "feedback_curso_universitario.csv:157",
+    "feedback_curso_universitario.csv:163",
+    "feedback_curso_universitario.csv:170",
+    "feedback_curso_universitario.csv:175",
+    "feedback_curso_universitario.csv:188",
+    "feedback_curso_universitario.csv:189",
+    "feedback_curso_universitario.csv:191",
+    "feedback_curso_universitario2.csv:1",
+    "feedback_curso_universitario2.csv:9",
+    "feedback_curso_universitario2.csv:11",
+    "feedback_curso_universitario2.csv:34",
+    "feedback_curso_universitario2.csv:35",
+    "feedback_curso_universitario2.csv:37",
+    "feedback_curso_universitario2.csv:40",
+    "feedback_curso_universitario2.csv:48",
+    "feedback_curso_universitario2.csv:49",
+    "feedback_curso_universitario2.csv:55",
+    "feedback_curso_universitario2.csv:79",
+    "feedback_curso_universitario2.csv:94",
+    "feedback_curso_universitario2.csv:102",
+    "feedback_curso_universitario2.csv:121",
+    "feedback_curso_universitario2.csv:130",
+    "feedback_curso_universitario2.csv:131",
+    "feedback_curso_universitario2.csv:133",
+    "feedback_curso_universitario2.csv:135",
+    "feedback_curso_universitario2.csv:137",
+    "feedback_curso_universitario2.csv:142",
+    "feedback_curso_universitario2.csv:144",
+    "feedback_curso_universitario2.csv:147",
+    "feedback_curso_universitario2.csv:148",
+    "feedback_curso_universitario2.csv:150",
+    "feedback_curso_universitario2.csv:159",
+    "feedback_curso_universitario2.csv:166",
+    "feedback_curso_universitario2.csv:169",
+    "feedback_curso_universitario2.csv:171",
+    "feedback_curso_universitario2.csv:175",
+    "feedback_curso_universitario2.csv:198",
+    "feedback_curso_universitario2.csv:206",
+    "feedback_curso_universitario2.csv:222",
+    "feedback_curso_universitario2.csv:224",
+    "feedback_curso_universitario2.csv:228",
+    "feedback_curso_universitario2.csv:232",
+    "feedback_curso_universitario2.csv:233",
+    "feedback_curso_universitario2.csv:236",
+    "feedback_curso_universitario2.csv:237",
+    "feedback_curso_universitario2.csv:241",
+    "feedback_curso_universitario2.csv:242",
+    "feedback_curso_universitario2.csv:252",
+    "feedback_curso_universitario2.csv:253",
+    "feedback_curso_universitario2.csv:258",
+    "feedback_curso_universitario2.csv:260",
+    "feedback_curso_universitario2.csv:262",
+    "feedback_curso_universitario2.csv:266",
+    "feedback_curso_universitario2.csv:269",
+    "feedback_curso_universitario2.csv:275",
+    "feedback_curso_universitario2.csv:278",
+    "feedback_curso_universitario2.csv:289",
+    "feedback_curso_universitario2.csv:291",
+    "feedback_curso_universitario2.csv:293",
+    "feedback_curso_universitario2.csv:294",
+    "feedback_curso_universitario2.csv:300",
+    "feedback_curso_universitario2.csv:304",
+    "feedback_curso_universitario2.csv:306",
+    "feedback_curso_universitario2.csv:312",
+    "feedback_curso_universitario2.csv:321",
+    "feedback_curso_universitario2.csv:332",
+    "feedback_curso_universitario2.csv:335",
+    "feedback_curso_universitario2.csv:336",
+    "feedback_curso_universitario2.csv:338",
+    "feedback_curso_universitario2.csv:339",
+    "feedback_curso_universitario2.csv:340",
+    "feedback_curso_universitario2.csv:355",
+    "feedback_curso_universitario2.csv:358",
+    "feedback_curso_universitario2.csv:360",
+    "feedback_curso_universitario2.csv:361",
+    "feedback_curso_universitario2.csv:368",
+    "feedback_curso_universitario2.csv:373",
+    "feedback_curso_universitario2.csv:381",
+    "feedback_curso_universitario2.csv:382",
+    "feedback_curso_universitario2.csv:395",
+    "feedback_curso_universitario2.csv:399",
+    "feedback_curso_universitario2.csv:402",
+    "feedback_curso_universitario2.csv:405",
+    "feedback_curso_universitario3.csv:4",
+    "feedback_curso_universitario3.csv:15"
+  ],
+  "topics": [
+    {
+      "size": 30,
+      "terms": [
+        "actividades",
+        "prácticas",
+        "explicación",
+        "mucho",
+        "pesar"
+      ],
+      "topic": 0
+    },
+    {
+      "size": 48,
+      "terms": [
+        "diseño",
+        "diapositivas",
+        "podría",
+        "haber",
+        "criterios"
+      ],
+      "topic": 1
+    },
+    {
+      "size": 87,
+      "terms": [
+        "carga",
+        "ritmo",
+        "trabajo",
+        "académica",
+        "resultó"
+      ],
+      "topic": 2
+    },
+    {
+      "size": 57,
+      "terms": [
+        "es",
+        "horario",
+        "manera",
+        "algo",
+        "está"
+      ],
+      "topic": 3
+    },
+    {
+      "size": 50,
+      "terms": [
+        "retroalimentación",
+        "mis",
+        "correos",
+        "exámenes",
+        "recibida"
+      ],
+      "topic": 4
+    },
+    {
+      "size": 55,
+      "terms": [
+        "recursos",
+        "digital",
+        "disponibilidad",
+        "aula",
+        "hubo"
+      ],
+      "topic": 5
+    },
+    {
+      "size": 59,
+      "terms": [
+        "sido",
+        "he",
+        "han",
+        "estoy",
+        "al"
+      ],
+      "topic": 6
+    },
+    {
+      "size": 18,
+      "terms": [
+        "sistemas",
+        "operativos",
+        "sobre",
+        "cómo",
+        "mucho"
+      ],
+      "topic": 7
+    },
+    {
+      "size": 47,
+      "terms": [
+        "experiencia",
+        "plataforma",
+        "soporte",
+        "complejos",
+        "técnico"
+      ],
+      "topic": 8
+    },
+    {
+      "size": 43,
+      "terms": [
+        "parciales",
+        "preguntas",
+        "difíciles",
+        "dificultad",
+        "poco"
+      ],
+      "topic": 9
+    }
+  ]
+}
