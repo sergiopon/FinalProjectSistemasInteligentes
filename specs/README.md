@@ -32,7 +32,7 @@
 | 027 | [Web review queue and export](027-web-review-queue-export.md) | 025, 026 | To draft |
 | 028 | [Docker and clean environment](028-docker-clean-env.md) | 024 | To draft |
 | 029 | [ML gold-set evaluation](029-ml-gold-evaluation.md) | 013, 015 | To draft |
-| 030 | [Benchmark and README](030-benchmark-readme.md) | 024 | To draft |
+| 030 | [Benchmark and README](030-benchmark-readme.md) | 024 | Ready |
 
 ## Corrections
 

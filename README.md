@@ -59,7 +59,7 @@ Implemented: **19 of 31** specs.
 | 027 | [Web review queue and export](specs/027-web-review-queue-export.md) | Felipe Moncada | To draft |
 | 028 | [Docker and clean environment](specs/028-docker-clean-env.md) | Felipe Moncada | To draft |
 | 029 | [ML gold-set evaluation](specs/029-ml-gold-evaluation.md) | Andres Acosta | To draft |
-| 030 | [Benchmark and README](specs/030-benchmark-readme.md) | Sergio Ponce | To draft |
+| 030 | [Benchmark and README](specs/030-benchmark-readme.md) | Sergio Ponce | Ready |
 <!-- progress:end -->
 
 To update it, change the status of the spec in `specs/README.md`, run `bash scripts/update_progress.sh`, and commit
