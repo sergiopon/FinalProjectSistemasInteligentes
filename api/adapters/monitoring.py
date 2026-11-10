@@ -9,6 +9,7 @@ import re
 import threading
 from collections import deque
 from collections.abc import Mapping, Sequence
+from datetime import UTC, datetime
 
 from api.domain.entities import Decision
 from api.domain.errors import InvalidInputError, ModelIntegrityError
@@ -29,6 +30,11 @@ _P95: int = 95
 _INVALID_REFERENCE: str = "reference stats are invalid"
 
 logger = logging.getLogger(__name__)
+
+
+def utc_now_iso() -> str:
+    """Return the current UTC time as YYYY-MM-DDTHH:MM:SSZ."""
+    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def nearest_rank(sorted_values: Sequence[float], percent: int) -> float:

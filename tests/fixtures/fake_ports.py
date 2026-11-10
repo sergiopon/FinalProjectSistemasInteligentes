@@ -4,6 +4,11 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 
+from api.adapters.monitoring import InMemoryMetricsStore
+from api.adapters.settings import LimitSettings
+from api.application.analyze import AnalyzeBatch, AnalyzeComment
+from api.application.course_report import BuildCourseReport
+from api.domain.decision import DecisionCosts
 from api.domain.entities import (
     ASPECT_ORDER,
     AspectGroup,
@@ -14,6 +19,9 @@ from api.domain.entities import (
     WordInfluence,
 )
 from api.domain.errors import InvalidInputError
+from api.domain.reports import DriftReport, ModelInfo
+from api.ports.models import PolarityModel
+from api.routes import Services
 
 DEFAULT_PROBABILITIES: tuple[float, float, float] = (0.1, 0.1, 0.8)
 DEFAULT_SET: frozenset[Polarity] = frozenset({Polarity.POSITIVE})
@@ -131,3 +139,54 @@ class FakeTopicModel:
         if topic not in self._terms_by_topic:
             raise InvalidInputError("unknown topic")
         return self._terms_by_topic[topic]
+
+
+class FakeDriftDetector:
+    def __init__(self) -> None:
+        self.calls: list[tuple[tuple[str, ...], str, str]] = []
+
+    def compare(self, texts: Sequence[str], body_sha256: str, created_at: str) -> DriftReport:
+        self.calls.append((tuple(texts), body_sha256, created_at))
+        return DriftReport(body_sha256, len(texts), 0.0, 0.0, 0.0, False, created_at)
+
+
+class RaisingPolarityModel:
+    def __init__(self, error: Exception) -> None:
+        self._error = error
+
+    def predict_proba(self, texts: Sequence[str]) -> tuple[ClassProbabilities, ...]:
+        raise self._error
+
+    def predict_set(self, texts: Sequence[str]) -> tuple[ConformalSet, ...]:
+        raise self._error
+
+
+C1_TEXT = "El contenido fue claro, pero los parciales fueron difíciles."
+FIXED_CLOCK = "2026-11-05T12:00:00Z"
+
+
+def make_services(
+    polarity: PolarityModel | None = None, max_upload_bytes: int = 2097152
+) -> Services:
+    model = polarity or FakePolarityModel(
+        {C1_TEXT: (0.31, 0.52, 0.17)},
+        {C1_TEXT: frozenset({Polarity.NEGATIVE, Polarity.NEUTRAL})},
+    )
+    costs = DecisionCosts(5.0, 1.0, True)
+    aspects = FakeAspectModel({})
+    anonymizer = FakeAnonymizer()
+    topics = FakeTopicModel({}, {0: ("curso", "clase", "tema", "contenido", "horario")})
+    return Services(
+        model_info=ModelInfo(
+            "v001", FIXED_CLOCK, "0" * 64, "logistic_regression", "tfidf", 0.9, 0.61, 0.9
+        ),
+        analyze_comment=AnalyzeComment(model, aspects, FakeExplainer(()), costs),
+        analyze_batch=AnalyzeBatch(model, aspects, anonymizer, costs),
+        course_report=BuildCourseReport(anonymizer, FakeSummarizer(), topics),
+        drift=FakeDriftDetector(),
+        metrics=InMemoryMetricsStore(),
+        limits=LimitSettings(
+            max_text_chars=2000, max_upload_bytes=max_upload_bytes, max_upload_rows=5000
+        ),
+        clock=lambda: FIXED_CLOCK,
+    )
