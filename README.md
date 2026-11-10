@@ -124,7 +124,7 @@ Critical path: 000, 002, 003, 007, 008 and 009, 010, 011, 013, 017, 018, 024, 02
 <!-- progress:start -->
 _Updated 2026-11-09 from `specs/README.md`._
 
-Implemented: **23 of 31** specs.
+Implemented: **24 of 31** specs.
 
 | # | Spec | Owner | Status |
 |---|---|---|---|
@@ -158,7 +158,7 @@ Implemented: **23 of 31** specs.
 | 027 | [Web review queue and export](specs/027-web-review-queue-export.md) | Felipe Moncada | To draft |
 | 028 | [Docker and clean environment](specs/028-docker-clean-env.md) | Felipe Moncada | To draft |
 | 029 | [ML gold-set evaluation](specs/029-ml-gold-evaluation.md) | Andres Acosta | To draft |
-| 030 | [Benchmark and README](specs/030-benchmark-readme.md) | Sergio Ponce | Ready |
+| 030 | [Benchmark and README](specs/030-benchmark-readme.md) | Sergio Ponce | Implemented |
 <!-- progress:end -->
 
 To update it, change the status of the spec in `specs/README.md`, run `bash scripts/update_progress.sh`, and commit
