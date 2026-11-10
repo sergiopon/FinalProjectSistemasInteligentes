@@ -25,7 +25,7 @@ Critical path: 000, 002, 003, 007, 008 and 009, 010, 011, 013, 017, 018, 024, 02
 <!-- progress:start -->
 _Updated 2026-11-09 from `specs/README.md`._
 
-Implemented: **12 of 31** specs.
+Implemented: **19 of 31** specs.
 
 | # | Spec | Owner | Status |
 |---|---|---|---|
@@ -41,18 +41,18 @@ Implemented: **12 of 31** specs.
 | 009 | [ML representations](specs/009-ml-representations.md) | Andres Acosta | Implemented |
 | 010 | [ML model selection](specs/010-ml-model-selection.md) | Andres Acosta | Implemented |
 | 011 | [ML conformal](specs/011-ml-conformal.md) | Andres Acosta | Implemented |
-| 012 | [ML aspects and topics](specs/012-ml-aspects.md) | Jose David Ruano | To draft |
-| 013 | [ML artifact and registry](specs/013-ml-artifact-registry.md) | Jose David Ruano | To draft |
+| 012 | [ML aspects and topics](specs/012-ml-aspects.md) | Jose David Ruano | Implemented |
+| 013 | [ML artifact and registry](specs/013-ml-artifact-registry.md) | Jose David Ruano | Implemented |
 | 014 | [ML train CLI](specs/014-ml-train-cli.md) | Jose David Ruano | To draft |
 | 015 | [ML gold set and agreement](specs/015-ml-gold-agreement.md) | Andres Acosta | To draft |
-| 016 | [Adapters settings and logging](specs/016-adapters-settings-logging.md) | Jose David Ruano | To draft |
+| 016 | [Adapters settings and logging](specs/016-adapters-settings-logging.md) | Jose David Ruano | Implemented |
 | 017 | [Adapters model store](specs/017-adapters-model-store.md) | Jose David Ruano | To draft |
 | 018 | [Adapters scikit-learn models](specs/018-adapters-sklearn-models.md) | Jose David Ruano | To draft |
-| 019 | [Adapters text](specs/019-adapters-text.md) | Jose David Ruano | To draft |
-| 020 | [Adapters monitoring](specs/020-adapters-monitoring.md) | Felipe Moncada | To draft |
+| 019 | [Adapters text](specs/019-adapters-text.md) | Jose David Ruano | Implemented |
+| 020 | [Adapters monitoring](specs/020-adapters-monitoring.md) | Felipe Moncada | Implemented |
 | 021 | [Adapters HTTP schemas and CSV](specs/021-adapters-http-csv.md) | Felipe Moncada | To draft |
-| 022 | [Application analyze](specs/022-application-analyze.md) | Felipe Moncada | To draft |
-| 023 | [Application course report](specs/023-application-course-report.md) | Felipe Moncada | To draft |
+| 022 | [Application analyze](specs/022-application-analyze.md) | Felipe Moncada | Implemented |
+| 023 | [Application course report](specs/023-application-course-report.md) | Felipe Moncada | Implemented |
 | 024 | [API main and routes](specs/024-api-main-routes.md) | Felipe Moncada | To draft |
 | 025 | [Web single comment](specs/025-web-single-comment.md) | Felipe Moncada | To draft |
 | 026 | [Web batch and heatmap](specs/026-web-batch-heatmap.md) | Felipe Moncada | To draft |
