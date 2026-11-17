@@ -122,9 +122,9 @@ Critical path: 000, 002, 003, 007, 008 and 009, 010, 011, 013, 017, 018, 024, 02
 ## Progress
 
 <!-- progress:start -->
-_Updated 2026-11-09 from `specs/README.md`._
+_Updated 2026-11-16 from `specs/README.md`._
 
-Implemented: **27 of 31** specs.
+Implemented: **30 of 31** specs.
 
 | # | Spec | Owner | Status |
 |---|---|---|---|
@@ -153,9 +153,9 @@ Implemented: **27 of 31** specs.
 | 022 | [Application analyze](specs/022-application-analyze.md) | Felipe Moncada | Implemented |
 | 023 | [Application course report](specs/023-application-course-report.md) | Felipe Moncada | Implemented |
 | 024 | [API main and routes](specs/024-api-main-routes.md) | Felipe Moncada | Implemented |
-| 025 | [Web single comment](specs/025-web-single-comment.md) | Felipe Moncada | To draft |
-| 026 | [Web batch and heatmap](specs/026-web-batch-heatmap.md) | Felipe Moncada | To draft |
-| 027 | [Web review queue and export](specs/027-web-review-queue-export.md) | Felipe Moncada | To draft |
+| 025 | [Web single comment](specs/025-web-single-comment.md) | Felipe Moncada | Implemented |
+| 026 | [Web batch and heatmap](specs/026-web-batch-heatmap.md) | Felipe Moncada | Implemented |
+| 027 | [Web review queue and export](specs/027-web-review-queue-export.md) | Felipe Moncada | Implemented |
 | 028 | [Docker and clean environment](specs/028-docker-clean-env.md) | Felipe Moncada | To draft |
 | 029 | [ML gold-set evaluation](specs/029-ml-gold-evaluation.md) | Andres Acosta | Implemented |
 | 030 | [Benchmark and README](specs/030-benchmark-readme.md) | Sergio Ponce | Implemented |

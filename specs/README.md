@@ -27,9 +27,9 @@
 | 022 | [Application analyze](022-application-analyze.md) | 004, 005, 006 | Implemented |
 | 023 | [Application course report](023-application-course-report.md) | 022 | Implemented |
 | 024 | [API main and routes](024-api-main-routes.md) | 017, 018, 019, 020, 021, 022, 023 | Implemented |
-| 025 | [Web single comment](025-web-single-comment.md) | 024 | To draft |
-| 026 | [Web batch and heatmap](026-web-batch-heatmap.md) | 024, 025 | To draft |
-| 027 | [Web review queue and export](027-web-review-queue-export.md) | 025, 026 | To draft |
+| 025 | [Web single comment](025-web-single-comment.md) | 024 | Implemented |
+| 026 | [Web batch and heatmap](026-web-batch-heatmap.md) | 024, 025 | Implemented |
+| 027 | [Web review queue and export](027-web-review-queue-export.md) | 025, 026 | Implemented |
 | 028 | [Docker and clean environment](028-docker-clean-env.md) | 024 | To draft |
 | 029 | [ML gold-set evaluation](029-ml-gold-evaluation.md) | 013, 015 | Implemented |
 | 030 | [Benchmark and README](030-benchmark-readme.md) | 024 | Implemented |
