@@ -2,7 +2,8 @@
  * Pure render functions for batch upload results and heatmap (spec 026).
  */
 
-import { ASPECT_NAMES, ASPECT_ORDER, el, formatPercent, formatScore } from "./common.js";
+import { ASPECT_NAMES, ASPECT_ORDER, el, formatPercent, formatScore, getAspectName } from "./common.js";
+import { getLang } from "./i18n.js";
 
 export const MIN_SUPPORT = 5;
 export const HEAT_CLASSES = ["heat-0", "heat-1", "heat-2", "heat-3", "heat-4"];
@@ -69,7 +70,7 @@ export function renderHeatmap(courses) {
 
   const headerCells = [
     el("th", { scope: "col" }, ["Course"]),
-    ...ASPECT_ORDER.map((grp) => el("th", { scope: "col" }, [ASPECT_NAMES[grp]])),
+    ...ASPECT_ORDER.map((grp) => el("th", { scope: "col" }, [getAspectName(grp, getLang())])),
   ];
   const thead = el("thead", {}, [el("tr", {}, headerCells)]);
 
@@ -112,7 +113,7 @@ function renderPriorities(priorities) {
     return [el("p", {}, ["No aspect was mentioned in this course."])];
   }
   const items = priorities.map((p) => {
-    const name = ASPECT_NAMES[p.group] || p.group;
+    const name = getAspectName(p.group, getLang());
     const mentionsText = countText(p.mentions, "mention", "mentions");
     const supportSuffix = p.low_support ? ", fewer than 5 mentions" : "";
     const text = `${name}, score ${formatScore(p.score)} (${mentionsText}, ${p.negative} negative${supportSuffix})`;

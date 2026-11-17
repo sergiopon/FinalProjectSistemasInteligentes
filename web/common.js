@@ -28,12 +28,45 @@ export const ASPECT_NAMES = Object.freeze({
   workload_pace: "Workload and pace",
 });
 
+export const ASPECT_NAMES_ES = Object.freeze({
+  content: "Contenido",
+  assessment: "Evaluación",
+  feedback: "Retroalimentación",
+  methodology_clarity: "Metodología y claridad",
+  materials: "Materiales",
+  organization_schedule: "Organización y horario",
+  platform: "Plataforma",
+  communication_climate: "Comunicación y clima",
+  workload_pace: "Ritmo y carga de trabajo",
+});
+
 export const REASON_TEXT = Object.freeze({
   empty_set: "No class reached the confidence level",
   set_not_singleton: "More than one class is plausible",
   label_outside_set: "Top class is outside the prediction set",
   expected_cost: "Confidence below the review threshold",
 });
+
+export const REASON_TEXT_ES = Object.freeze({
+  empty_set: "Ninguna clase alcanzó el nivel de confianza",
+  set_not_singleton: "Más de una clase es plausible",
+  label_outside_set: "La clase predicha está fuera del conjunto conformal",
+  expected_cost: "Confianza por debajo del umbral de revisión",
+});
+
+export function getAspectName(group, lang = "es") {
+  if (lang === "es") {
+    return ASPECT_NAMES_ES[group] || ASPECT_NAMES[group] || group;
+  }
+  return ASPECT_NAMES[group] || group;
+}
+
+export function getReasonText(reason, lang = "es") {
+  if (lang === "es") {
+    return REASON_TEXT_ES[reason] || REASON_TEXT[reason] || reason;
+  }
+  return REASON_TEXT[reason] || reason;
+}
 
 export function formatPercent(value) {
   return `${Math.round(value * 100)} %`;

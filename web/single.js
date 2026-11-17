@@ -3,17 +3,18 @@
  */
 
 import {
-  ASPECT_NAMES,
   POLARITY_ORDER,
-  REASON_TEXT,
   clearError,
   el,
   formatPercent,
   formatScore,
+  getAspectName,
+  getReasonText,
   postJson,
   setBusy,
   showError,
 } from "./common.js";
+import { SAMPLE_COMMENTS, getLang, t } from "./i18n.js";
 
 export const MAX_TEXT_CHARS = 2000;
 
@@ -22,12 +23,13 @@ export function textLength(value) {
 }
 
 function buildDecisionLine(decision, reason) {
+  const lang = getLang();
   if (decision === "classify") {
-    return el("p", {}, ["Decision: classify"]);
+    return el("p", {}, [t("decisionClassify")]);
   }
-  const badge = el("span", { class: "badge" }, ["Needs review"]);
-  const reasonText = REASON_TEXT[reason] ? ` ${REASON_TEXT[reason]}` : "";
-  return el("p", {}, ["Decision: ", badge, reasonText]);
+  const badge = el("span", { class: "badge" }, [t("needsReview")]);
+  const reasonText = getReasonText(reason, lang) ? ` ${getReasonText(reason, lang)}` : "";
+  return el("p", {}, [`${t("decisionReview")} `, badge, reasonText]);
 }
 
 function buildProbabilitiesSection(probabilities, predicted) {
@@ -54,26 +56,27 @@ function buildProbabilitiesSection(probabilities, predicted) {
     );
     rows.push(row);
   }
-  return [el("h4", {}, ["Class probabilities"]), ...rows];
+  return [el("h4", {}, [t("classProbs")]), ...rows];
 }
 
 function buildAspectsSection(aspects) {
+  const lang = getLang();
   if (!aspects || aspects.length === 0) {
-    return [el("h4", {}, ["Aspects"]), el("p", {}, ["No aspect detected in this comment."])];
+    return [el("h4", {}, [t("aspectsTitle")]), el("p", {}, [t("noAspects")])];
   }
   const items = aspects.map((asp) => {
-    const name = ASPECT_NAMES[asp.group] || asp.group;
+    const name = getAspectName(asp.group, lang);
     const text = `${name}: ${asp.polarity} (score ${formatScore(asp.score)})`;
     return el("li", {}, [text]);
   });
-  return [el("h4", {}, ["Aspects"]), el("ul", { class: "aspect-list" }, items)];
+  return [el("h4", {}, [t("aspectsTitle")]), el("ul", { class: "aspect-list" }, items)];
 }
 
 function buildInfluencesSection(influences) {
   if (!influences || influences.length === 0) {
     return [
-      el("h4", {}, ["Words that changed the prediction most"]),
-      el("p", {}, ["No single word changed the prediction."]),
+      el("h4", {}, [t("influencesTitle")]),
+      el("p", {}, [t("noInfluences")]),
     ];
   }
   const items = influences.map((item) => {
@@ -81,12 +84,9 @@ function buildInfluencesSection(influences) {
     const text = `${item.word}: ${sign}${formatScore(Math.abs(item.delta))}`;
     return el("li", {}, [text]);
   });
-  const caption = el("p", { class: "caption" }, [
-    "Each value is the drop in the probability of the predicted class when the word is removed. " +
-      "A negative value means the word pulled against it.",
-  ]);
+  const caption = el("p", { class: "caption" }, [t("influencesCaption")]);
   return [
-    el("h4", {}, ["Words that changed the prediction most"]),
+    el("h4", {}, [t("influencesTitle")]),
     el("ul", { class: "influence-list" }, items),
     caption,
   ];
@@ -96,18 +96,18 @@ function renderResultCard(data) {
   const setLabels =
     data.conformal_set && data.conformal_set.length > 0
       ? data.conformal_set.join(", ")
-      : "no class";
+      : t("noClass");
   const confText = formatPercent(data.confidence_level);
 
   const card = el("article", { class: "card" }, [
-    el("h3", {}, ["Result"]),
-    el("p", {}, [`Predicted: ${data.predicted}`]),
+    el("h3", {}, [t("resultTitle")]),
+    el("p", {}, [`${t("predicted")} ${data.predicted}`]),
     buildDecisionLine(data.decision, data.reason),
-    el("p", {}, [`Prediction set at ${confText}: ${setLabels}`]),
+    el("p", {}, [`${t("predSet")} ${confText}: ${setLabels}`]),
     ...buildProbabilitiesSection(data.probabilities, data.predicted),
     ...buildAspectsSection(data.aspects),
     ...buildInfluencesSection(data.influences),
-    el("p", { class: "caption" }, [`Model ${data.model_version}`]),
+    el("p", { class: "caption" }, [`${t("modelPrefix")} ${data.model_version}`]),
   ]);
   return card;
 }
@@ -136,6 +136,17 @@ export function initSingle(panel) {
       counter.classList.remove("over-limit");
       button.disabled = n === 0;
     }
+  }
+
+  const chips = panel.querySelectorAll(".chip");
+  for (const chip of chips) {
+    chip.addEventListener("click", () => {
+      const type = chip.dataset.sample;
+      if (SAMPLE_COMMENTS[type]) {
+        textarea.value = SAMPLE_COMMENTS[type];
+        updateCounter();
+      }
+    });
   }
 
   textarea.addEventListener("input", updateCounter);

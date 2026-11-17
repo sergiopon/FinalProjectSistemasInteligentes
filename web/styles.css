@@ -17,6 +17,47 @@ body {
 
 header, main { max-width: 1120px; margin: 0 auto; padding: 0 var(--sp-4); }
 
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.lang-btn {
+  font-size: var(--fs-sm);
+  min-height: 36px;
+  min-width: 80px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: var(--surface);
+  border: 1px solid var(--control-border);
+}
+
+.sample-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  align-items: center;
+  margin: var(--sp-2) 0 var(--sp-3) 0;
+}
+
+.chip {
+  font-size: var(--fs-sm);
+  min-height: 36px;
+  min-width: auto;
+  padding: 4px 12px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--control-border);
+}
+
+.sample-hint {
+  font-style: italic;
+  margin-top: var(--sp-2);
+}
+
 h1, h2, h3, h4 { line-height: 1.25; font-weight: 600; color: var(--text); }
 .intro, .caption { color: var(--text-muted); }
 .caption { font-size: var(--fs-sm); }

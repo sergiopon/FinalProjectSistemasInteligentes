@@ -9,8 +9,11 @@
   </head>
   <body>
     <header>
-      <h1>From comment to action</h1>
-      <p class="intro">Analyze Spanish course-evaluation comments. Each result shows the likely polarity, the classes the model cannot rule out, and whether a person should review the comment. The service stores nothing you enter.</p>
+      <div class="header-top">
+        <h1 id="app-title">From comment to action</h1>
+        <button type="button" id="lang-toggle" class="lang-btn" aria-label="Cambiar idioma">Español / English</button>
+      </div>
+      <p class="intro" id="app-intro">Analyze Spanish course-evaluation comments. Each result shows the likely polarity, the classes the model cannot rule out, and whether a person should review the comment. The service stores nothing you enter.</p>
     </header>
     <main>
       <div role="tablist" aria-label="Views">
@@ -20,9 +23,15 @@
       </div>
 
       <section role="tabpanel" id="panel-single" aria-labelledby="tab-single">
-        <h2>Analyze one comment</h2>
+        <h2 id="single-title">Analyze one comment</h2>
         <p class="empty" id="single-empty">Paste a comment and select Analyze.</p>
-        <label for="comment-text">Comment</label>
+        <div class="sample-chips" id="single-samples">
+          <span class="caption" id="samples-label">Examples to try:</span>
+          <button type="button" class="chip" data-sample="positive">Positive</button>
+          <button type="button" class="chip" data-sample="mixed">Mixed (Needs review)</button>
+          <button type="button" class="chip" data-sample="negative">Negative</button>
+        </div>
+        <label for="comment-text" id="comment-label">Comment</label>
         <textarea id="comment-text" rows="6" aria-describedby="comment-counter"></textarea>
         <p id="comment-counter" class="counter">0 / 2000 characters</p>
         <button type="button" id="analyze-button" class="primary" disabled>Analyze</button>
@@ -32,13 +41,14 @@
       </section>
 
       <section role="tabpanel" id="panel-batch" aria-labelledby="tab-batch" hidden>
-        <h2>Analyze a CSV file</h2>
+        <h2 id="batch-title">Analyze a CSV file</h2>
         <p class="empty" id="batch-empty">Upload a CSV file to see the course heatmap.</p>
         <div class="dropzone" id="dropzone">
-          <p>Drop a CSV file here or choose a file</p>
+          <p id="dropzone-text">Drop a CSV file here or choose a file</p>
           <button type="button" id="choose-file">Choose file</button>
           <input type="file" id="file-input" accept=".csv,text/csv" hidden>
-          <p class="hint">UTF-8 CSV with columns feedback and curso, up to 2 MB and 5,000 rows</p>
+          <p class="hint" id="file-hint">UTF-8 CSV with columns feedback and curso, up to 2 MB and 5,000 rows</p>
+          <p class="hint sample-hint" id="sample-csv-hint">Tip: Use Dataset/feedback_curso_universitario3.csv from the project</p>
         </div>
         <p id="file-status" aria-live="polite">No file selected.</p>
         <p id="file-error" class="field-error" role="alert"></p>
@@ -49,12 +59,12 @@
       </section>
 
       <section role="tabpanel" id="panel-review" aria-labelledby="tab-review" hidden>
-        <h2>Review queue</h2>
+        <h2 id="review-title">Review queue</h2>
         <p class="empty" id="review-empty">Upload a CSV file in Batch upload to fill the review queue.</p>
         <p id="review-summary" hidden></p>
         <p id="review-notice" class="field-error" role="alert"></p>
         <button type="button" id="export-csv" class="primary" disabled>Export CSV</button>
-        <p class="caption">Decisions are saved in this browser only. Export the queue to share them.</p>
+        <p class="caption" id="review-caption">Decisions are saved in this browser only. Export the queue to share them.</p>
         <div id="review-table"></div>
       </section>
     </main>
