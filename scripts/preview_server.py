@@ -36,6 +36,17 @@ class PreviewHandler(SimpleHTTPRequestHandler):
         self.send_header("X-Request-ID", uuid.uuid4().hex)
         super().end_headers()
 
+    def do_GET(self) -> None:
+        if self.path == "/health":
+            body = json.dumps({"status": "ok", "model_version": "preview"}).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+        super().do_GET()
+
     def do_POST(self) -> None:
         content_length = int(self.headers.get("Content-Length", 0))
         raw_body = self.rfile.read(content_length)
@@ -56,10 +67,20 @@ class PreviewHandler(SimpleHTTPRequestHandler):
             return
 
         text_lower = text.lower()
-        # Realistic heuristic matching our trained model behavior
-        is_mixed = any(w in text_lower for w in ["pero", "aunque", "sin embargo"])
-        is_neg = any(w in text_lower for w in ["difícil", "injusto", "malo", "tarde", "pésimo", "pesimo", "horrible", "pesada"])
-        is_pos = any(w in text_lower for w in ["excelente", "claro", "bueno", "gustó", "gusto", "increíble", "aprender", "recomiendo"])
+        # Keyword heuristic: this is a MOCK, not the trained model.
+        neg_words = [
+            "difícil", "dificil", "injust", "malo", "mala", "mal ", "tarde", "pésim", "pesim", "horrible",
+            "pesada", "desmedid", "nunca", "no correspond", "no sirve", "asquerosa", "asqueroso",
+            "suspend", "ojala", "ojalá", "terrible", "aburrid", "deficiente", "no llegó", "no llego",
+            "falta de", "excesiv", "caótic", "caotic", "pobre",
+        ]
+        pos_words = [
+            "excelent", "claro", "claras", "bueno", "buena", "gustó", "gusto", "increíble", "increible",
+            "aprend", "recomiendo", "completo", "interesante", "genial", "fantástic", "fantastic",
+        ]
+        is_neg = any(w in text_lower for w in neg_words)
+        is_pos = any(w in text_lower for w in pos_words)
+        is_mixed = is_neg and is_pos
 
         if is_mixed:
             predicted = "neutral"
@@ -73,12 +94,18 @@ class PreviewHandler(SimpleHTTPRequestHandler):
             conformal_set = ["negative"]
             decision = "classify"
             reason = "confident"
-        else:
+        elif is_pos:
             predicted = "positive"
             probs = {"negative": 0.05, "neutral": 0.18, "positive": 0.77}
             conformal_set = ["positive"]
             decision = "classify"
             reason = "confident"
+        else:
+            predicted = "neutral"
+            probs = {"negative": 0.31, "neutral": 0.38, "positive": 0.31}
+            conformal_set = ["negative", "neutral", "positive"]
+            decision = "review"
+            reason = "set_not_singleton"
 
         aspects = []
         if any(w in text_lower for w in ["parcial", "examen", "evaluacion", "evaluación", "nota"]):

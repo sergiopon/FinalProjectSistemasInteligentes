@@ -2,8 +2,8 @@
  * Pure render functions for batch upload results and heatmap (spec 026).
  */
 
-import { ASPECT_NAMES, ASPECT_ORDER, el, formatPercent, formatScore, getAspectName } from "./common.js";
-import { getLang } from "./i18n.js";
+import { ASPECT_ORDER, countUp, el, stagger, formatPercent, formatScore, getAspectName } from "./common.js";
+import { getLang, t } from "./i18n.js";
 
 export const MIN_SUPPORT = 5;
 export const HEAT_CLASSES = ["heat-0", "heat-1", "heat-2", "heat-3", "heat-4"];
@@ -28,139 +28,183 @@ export function heatStep(share) {
   return 4;
 }
 
+function locale() {
+  return getLang() === "es" ? "es-ES" : "en-US";
+}
+
 export function countText(count, singular, plural) {
-  return `${count.toLocaleString("en-US")} ${count === 1 ? singular : plural}`;
+  return `${count.toLocaleString(locale())} ${count === 1 ? singular : plural}`;
+}
+
+function kpi(label, value, tone = "text-slate-900") {
+  const number = el("p", { class: `mt-1 text-2xl font-semibold tabular-nums ${tone}` }, [typeof value === "number" ? "0" : value]);
+  if (typeof value === "number") {
+    countUp(number, value, (n) => Math.round(n).toLocaleString(locale()));
+  }
+  return el("div", { class: "card lift !p-4" }, [el("p", { class: "h-section" }, [label]), number]);
 }
 
 export function renderSummary(response) {
-  const rowCountText = countText(response.row_count, "comment", "comments");
-  const classifyCount = response.decision_counts.classify.toLocaleString("en-US");
-  const reviewCount = response.decision_counts.review.toLocaleString("en-US");
-  const text = `${rowCountText} analyzed: ${classifyCount} classified, ${reviewCount} sent to review. Model ${response.model_version}.`;
-  return el("p", {}, [text]);
+  return el("div", { class: "grid grid-cols-2 gap-3 sm:grid-cols-4" }, stagger([
+    kpi(t("kpiComments"), response.row_count),
+    kpi(t("kpiClassified"), response.decision_counts.classify, "text-green-600"),
+    kpi(t("kpiReview"), response.decision_counts.review, "text-amber-600"),
+    kpi(t("kpiModel"), response.model_version, "text-brand-700"),
+  ]));
 }
 
 function renderHeatCell(cellData) {
+  const base = "px-3 py-2 text-center text-sm";
   if (!cellData || cellData.mentions === 0) {
-    return el("td", { class: "heat-none" }, ["No mentions"]);
+    return el("td", { class: `heat-none ${base}` }, ["–"]);
   }
   const step = heatStep(cellData.negative_share);
   const heatClass = HEAT_CLASSES[step] || "heat-none";
-  const shareSpan = el("span", { class: "cell-share num" }, [
-    formatPercent(cellData.negative_share ?? 0),
+  const lowSupport = cellData.mentions < MIN_SUPPORT;
+  return el("td", { class: `${heatClass} ${base}` }, [
+    el("span", { class: "block font-semibold tabular-nums" }, [formatPercent(cellData.negative_share ?? 0)]),
+    el("span", { class: `block text-xs tabular-nums opacity-80 ${lowSupport ? "italic" : ""}` }, [
+      countText(cellData.mentions, t("mention"), t("mentions")),
+    ]),
   ]);
-  const countSpanClass = cellData.mentions < MIN_SUPPORT ? "cell-count num low-support" : "cell-count num";
-  const countSpan = el("span", { class: countSpanClass }, [
-    countText(cellData.mentions, "mention", "mentions"),
-  ]);
-  return el("td", { class: heatClass }, [shareSpan, countSpan]);
 }
 
 export function renderHeatmap(courses) {
-  const legendItems = [
-    el("li", {}, [el("span", { class: "swatch heat-0" }, ["0 to 19 %"])]),
-    el("li", {}, [el("span", { class: "swatch heat-1" }, ["20 to 39 %"])]),
-    el("li", {}, [el("span", { class: "swatch heat-2" }, ["40 to 59 %"])]),
-    el("li", {}, [el("span", { class: "swatch heat-3" }, ["60 to 79 %"])]),
-    el("li", {}, [el("span", { class: "swatch heat-4" }, ["80 to 100 %"])]),
-    el("li", {}, [el("span", { class: "swatch heat-none" }, ["No mentions"])]),
-    el("li", {}, [el("em", {}, ["Count in italics"]), ": Fewer than 5 mentions"]),
-  ];
-  const legend = el("ul", { class: "legend" }, legendItems);
+  const lang = getLang();
+  const swatch = (cls, text) => el("li", { class: `${cls} rounded px-2 py-0.5 text-xs` }, [text]);
+  const legend = el("ul", { class: "mt-3 flex flex-wrap items-center gap-2" }, [
+    swatch("heat-0", "0–19 %"),
+    swatch("heat-1", "20–39 %"),
+    swatch("heat-2", "40–59 %"),
+    swatch("heat-3", "60–79 %"),
+    swatch("heat-4", "80–100 %"),
+    swatch("heat-none", t("heatNone")),
+    el("li", { class: "text-xs italic text-slate-500" }, [t("heatLowSupport")]),
+  ]);
 
+  const thClass = "px-3 py-2 text-left text-xs font-semibold text-slate-600";
   const headerCells = [
-    el("th", { scope: "col" }, ["Course"]),
-    ...ASPECT_ORDER.map((grp) => el("th", { scope: "col" }, [getAspectName(grp, getLang())])),
+    el("th", { scope: "col", class: `${thClass} sticky left-0 bg-slate-50` }, [t("colCourse")]),
+    ...ASPECT_ORDER.map((grp) => el("th", { scope: "col", class: `${thClass} min-w-[7rem]` }, [getAspectName(grp, lang)])),
   ];
-  const thead = el("thead", {}, [el("tr", {}, headerCells)]);
+  const thead = el("thead", { class: "bg-slate-50" }, [el("tr", {}, headerCells)]);
 
   const rows = courses.map((course) => {
-    const cellsByGroup = new Map(
-      (course.aspects || []).map((asp) => [asp.group, asp])
-    );
-    const rowCells = [
-      el("th", { scope: "row" }, [course.course]),
+    const cellsByGroup = new Map((course.aspects || []).map((asp) => [asp.group, asp]));
+    return el("tr", { class: "border-t border-slate-200" }, [
+      el(
+        "th",
+        { scope: "row", class: "sticky left-0 whitespace-nowrap bg-white px-3 py-2 text-left text-sm font-medium text-slate-800" },
+        [course.course]
+      ),
       ...ASPECT_ORDER.map((grp) => renderHeatCell(cellsByGroup.get(grp))),
-    ];
-    return el("tr", {}, rowCells);
+    ]);
   });
-  const tbody = el("tbody", {}, rows);
-  const table = el("table", { class: "heatmap" }, [thead, tbody]);
-
-  const scrollRegion = el(
+  const table = el("table", { class: "w-full border-collapse" }, [thead, el("tbody", {}, rows)]);
+  const scroll = el(
     "div",
-    {
-      class: "table-scroll",
-      role: "region",
-      "aria-label": "Heatmap table, scrolls sideways",
-      tabindex: "0",
-    },
+    { class: "mt-4 overflow-x-auto rounded-lg border border-slate-200", role: "region", "aria-label": t("tableScroll"), tabindex: "0" },
     [table]
   );
-
-  return el("section", {}, [
-    el("h3", {}, ["Negative share by course and aspect"]),
-    el("p", { class: "caption" }, [
-      "Each cell shows the share of mentions with negative sentiment and the number of mentions.",
-    ]),
+  return el("section", { class: "card" }, [
+    el("h3", { class: "text-base font-semibold text-slate-900" }, [t("heatTitle")]),
+    el("p", { class: "mt-1 text-sm text-slate-500" }, [t("heatCaption")]),
     legend,
-    scrollRegion,
+    scroll,
   ]);
 }
 
 function renderPriorities(priorities) {
   if (!priorities || priorities.length === 0) {
-    return [el("p", {}, ["No aspect was mentioned in this course."])];
+    return el("p", { class: "text-sm text-slate-500" }, [t("noPriorities")]);
   }
-  const items = priorities.map((p) => {
-    const name = getAspectName(p.group, getLang());
-    const mentionsText = countText(p.mentions, "mention", "mentions");
-    const supportSuffix = p.low_support ? ", fewer than 5 mentions" : "";
-    const text = `${name}, score ${formatScore(p.score)} (${mentionsText}, ${p.negative} negative${supportSuffix})`;
-    return el("li", {}, [text]);
+  const lang = getLang();
+  const max = Math.max(...priorities.map((p) => p.score), 0.0001);
+  const items = priorities.map((p, i) => {
+    const bar = el("div", { class: "h-full rounded-full bg-brand-600 transition-all duration-700 ease-out" });
+    bar.style.width = "0%";
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      bar.style.width = `${Math.round((p.score / max) * 100)}%`;
+    }));
+    const low = p.low_support ? `, ${t("lowSupport")}` : "";
+    const detail = `${countText(p.mentions, t("mention"), t("mentions"))}, ${p.negative} ${t("negativeWord")}${low}`;
+    return el("li", { class: "flex items-center gap-3" }, [
+      el(
+        "span",
+        { class: "flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-600 text-xs font-semibold text-white" },
+        [String(i + 1)]
+      ),
+      el("div", { class: "min-w-0 flex-1" }, [
+        el("div", { class: "flex flex-wrap items-baseline justify-between gap-x-3" }, [
+          el("span", { class: "text-sm font-medium text-slate-800" }, [getAspectName(p.group, lang)]),
+          el("span", { class: "text-xs tabular-nums text-slate-500" }, [`${t("score")} ${formatScore(p.score)} · ${detail}`]),
+        ]),
+        el("div", { class: "mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100" }, [bar]),
+      ]),
+    ]);
   });
-  return [el("ol", { class: "priorities" }, items)];
+  return el("ol", { class: "space-y-3" }, stagger(items, 80));
+}
+
+function quote(text) {
+  return el(
+    "blockquote",
+    { class: "rounded-lg border-l-4 border-brand-600 bg-slate-50 px-3 py-2 text-sm italic text-slate-700" },
+    [text]
+  );
 }
 
 function renderTopics(topics) {
   if (!topics || topics.length === 0) {
-    return [el("p", {}, ["No topics were found for this course."])];
+    return el("p", { class: "text-sm text-slate-500" }, [t("noTopics")]);
   }
-  const items = topics.map((t) => {
-    const terms = (t.terms || []).join(", ");
-    const text = `${terms} (${countText(t.size, "comment", "comments")})`;
-    const bquote = el("blockquote", {}, [t.quote]);
-    return el("li", {}, [text, bquote]);
-  });
-  return [el("ul", {}, items)];
+  const items = topics.map((tp) =>
+    el("li", {}, [
+      el("p", { class: "text-sm font-medium text-slate-800" }, [
+        `${(tp.terms || []).join(", ")} `,
+        el("span", { class: "font-normal text-slate-500" }, [`(${countText(tp.size, t("comment"), t("comments"))})`]),
+      ]),
+      quote(tp.quote),
+    ])
+  );
+  return el("ul", { class: "space-y-2" }, items);
 }
 
 function renderQuotes(quotes) {
   if (!quotes || quotes.length === 0) {
-    return [el("p", {}, ["No representative comments for this course."])];
+    return el("p", { class: "text-sm text-slate-500" }, [t("noQuotes")]);
   }
-  return quotes.map((q) => el("blockquote", {}, [q]));
+  return el("div", { class: "space-y-2" }, quotes.map(quote));
+}
+
+function section(title, caption, body) {
+  return el("div", {}, [
+    el("h4", { class: "h-section" }, [title]),
+    caption ? el("p", { class: "mb-3 mt-1 text-xs text-slate-500" }, [caption]) : el("div", { class: "mb-3" }),
+    body,
+  ]);
 }
 
 export function renderCourse(course) {
-  const commentText = countText(course.comment_count, "comment", "comments");
-  const pcounts = course.polarity_counts || { negative: 0, neutral: 0, positive: 0 };
-  const infoText = `${commentText}, ${course.review_count} sent to review. Polarity: ${pcounts.negative} negative, ${pcounts.neutral} neutral, ${pcounts.positive} positive.`;
-
-  return el("section", { class: "course" }, [
-    el("h3", {}, [course.course]),
-    el("p", {}, [infoText]),
-    el("h4", {}, ["What to fix first"]),
-    el("p", { class: "caption" }, [
-      "Ranked by how often an aspect is mentioned times its smoothed negative share.",
+  const pc = course.polarity_counts || { negative: 0, neutral: 0, positive: 0 };
+  const pill = (cls, n, word) => el("span", { class: `badge ${cls}` }, [`${n} ${word}`]);
+  const info = `${countText(course.comment_count, t("comment"), t("comments"))}, ${course.review_count} ${t("courseInfo")}`;
+  return el("section", { class: "card space-y-6" }, [
+    el("div", { class: "flex flex-wrap items-center justify-between gap-3" }, [
+      el("div", {}, [
+        el("h3", { class: "text-lg font-semibold text-slate-900" }, [course.course]),
+        el("p", { class: "text-sm text-slate-500" }, [info]),
+      ]),
+      el("div", { class: "flex flex-wrap gap-2" }, [
+        pill("pol-negative", pc.negative, t("negativeWord")),
+        pill("pol-neutral", pc.neutral, t("neutralWord")),
+        pill("pol-positive", pc.positive, t("positiveWord")),
+      ]),
     ]),
-    ...renderPriorities(course.priorities),
-    el("h4", {}, ["Topics"]),
-    ...renderTopics(course.topics),
-    el("h4", {}, ["Representative comments"]),
-    el("p", { class: "caption" }, [
-      "Names, emails, phone numbers and id numbers are masked.",
+    el("div", { class: "grid gap-6 lg:grid-cols-2" }, [
+      section(t("fixFirst"), t("fixFirstCaption"), renderPriorities(course.priorities)),
+      section(t("topicsTitle"), null, renderTopics(course.topics)),
     ]),
-    ...renderQuotes(course.quotes),
+    section(t("quotesTitle"), t("quotesCaption"), renderQuotes(course.quotes)),
   ]);
 }

@@ -2,12 +2,13 @@
  * Review queue view and local storage (spec 027).
  */
 
-import { POLARITY_ORDER, REASON_TEXT, el } from "./common.js";
+import { POLARITY_ORDER, el, getReasonText, icon, stagger } from "./common.js";
 import { buildQueueCsv, downloadCsv, EXPORT_FILE_NAME } from "./export.js";
+import { getLang, polName, t } from "./i18n.js";
 import { countText } from "./report.js";
 
 export const STORAGE_PREFIX = "review-decisions:";
-export const ACTIONS = ["accept", "relabel"];
+export const ACTIONS = ["accept", "relabel", "escalate"];
 
 export function queueRows(response) {
   if (!response || !Array.isArray(response.rows)) {
@@ -55,17 +56,31 @@ export function saveDecisions(batchId, decisions) {
   }
 }
 
-function getStatusText(decision) {
-  if (!decision) {
-    return "Pending";
+const STATUS_STYLE = Object.freeze({
+  accept: { key: "statusAccepted", cls: "bg-green-600 text-white" },
+  relabel: { key: "statusRelabeled", cls: "bg-brand-600 text-white" },
+  escalate: { key: "statusEscalated", cls: "bg-red-600 text-white" },
+});
+
+function statusBadge(decision) {
+  const style = decision ? STATUS_STYLE[decision.action] : null;
+  if (!style) {
+    return el("span", { class: "badge bg-slate-500 text-white" }, [t("statusPending")]);
   }
-  if (decision.action === "accept") {
-    return `Accepted as ${decision.label}`;
-  }
-  if (decision.action === "relabel") {
-    return `Relabeled as ${decision.label}`;
-  }
-  return "Pending";
+  const label = decision.action === "escalate" ? "" : ` · ${polName(decision.label)}`;
+  return el("span", { class: `badge ${style.cls}` }, [`${t(style.key)}${label}`]);
+}
+
+function polChip(pol) {
+  return el("span", { class: `badge pol-${pol}` }, [polName(pol)]);
+}
+
+function actionBtn(label, iconName, tone, ariaLabel) {
+  return el(
+    "button",
+    { type: "button", class: `btn !min-h-[34px] !px-3 text-xs ${tone}`, "aria-label": ariaLabel },
+    [icon(iconName, 14), label]
+  );
 }
 
 export function initReview(panel) {
@@ -74,18 +89,20 @@ export function initReview(panel) {
   const notice = panel.querySelector("#review-notice");
   const exportBtn = panel.querySelector("#export-csv");
   const tableContainer = panel.querySelector("#review-table");
+  const progress = panel.querySelector("#review-progress");
+  const progressBar = panel.querySelector("#review-progress-bar");
+  const tabCount = document.getElementById("review-count");
 
   if (!empty || !summary || !notice || !exportBtn || !tableContainer) {
     return;
   }
 
   let state = { batchId: null, rows: [], decisions: {} };
+  let loaded = false;
 
   function refreshToggles() {
-    const toggles = panel.querySelectorAll(".clamp-toggle");
-    for (const btn of toggles) {
-      const targetId = btn.getAttribute("aria-controls");
-      const p = panel.querySelector(`#${targetId}`);
+    for (const btn of panel.querySelectorAll(".clamp-toggle")) {
+      const p = panel.querySelector(`#${btn.getAttribute("aria-controls")}`);
       if (p && p.classList.contains("clamp")) {
         btn.hidden = p.scrollHeight <= p.clientHeight + 1;
       }
@@ -94,17 +111,91 @@ export function initReview(panel) {
 
   function updateSummary() {
     const total = state.rows.length;
-    if (total === 0) {
-      summary.textContent = "No comments need review.";
-      summary.hidden = false;
-      exportBtn.disabled = true;
+    if (!loaded) {
       return;
     }
     const decided = Object.keys(state.decisions).length;
-    const countPart = countText(total, "comment needs", "comments need");
-    summary.textContent = `${countPart} review. ${decided} decided.`;
+    const pending = Math.max(0, total - decided);
+    if (tabCount) {
+      tabCount.textContent = String(pending);
+      tabCount.classList.toggle("hidden", pending === 0);
+    }
+    if (total === 0) {
+      summary.textContent = t("reviewNone");
+      summary.hidden = false;
+      exportBtn.disabled = true;
+      progress?.classList.add("hidden");
+      return;
+    }
+    summary.textContent = `${countText(pending, t("comment"), t("comments"))} ${t("reviewPending")} · ${decided} ${t("reviewDecided")}`;
     summary.hidden = false;
     exportBtn.disabled = false;
+    progress?.classList.remove("hidden");
+    if (progressBar) {
+      progressBar.style.width = `${Math.round((decided / total) * 100)}%`;
+    }
+  }
+
+  function buildRow(row) {
+    const rowKey = String(row.row);
+    const statusSlot = el("div", {});
+    const paint = () => statusSlot.replaceChildren(statusBadge(state.decisions[rowKey]));
+
+    const pComment = el("p", { class: "clamp text-sm text-slate-700", id: `comment-${row.row}` }, [row.text]);
+    const toggleBtn = el(
+      "button",
+      { type: "button", class: "clamp-toggle mt-1 text-xs font-medium text-brand-600 hover:underline", "aria-expanded": "false", "aria-controls": `comment-${row.row}`, hidden: "" },
+      [t("showMore")]
+    );
+    toggleBtn.addEventListener("click", () => {
+      const clamped = pComment.classList.toggle("clamp");
+      toggleBtn.setAttribute("aria-expanded", clamped ? "false" : "true");
+      toggleBtn.textContent = clamped ? t("showMore") : t("showLess");
+    });
+
+    const set = row.conformal_set || [];
+    const setChips = set.length ? set.map(polChip) : [el("span", { class: "text-xs text-slate-500" }, [t("noClass")])];
+
+    const select = el(
+      "select",
+      { id: `relabel-${row.row}`, "aria-label": `${t("newClass")} ${row.row}`, class: "min-h-[34px] rounded-lg border border-slate-300 bg-white px-2 text-xs capitalize focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500" },
+      POLARITY_ORDER.map((pol) => el("option", { value: pol }, [polName(pol)]))
+    );
+    const current = state.decisions[rowKey];
+    select.value = current && current.action === "relabel" ? current.label : row.predicted;
+
+    const acceptBtn = actionBtn(t("accept"), "check", "hover:border-green-600 hover:bg-green-600 hover:text-white", `${t("accept")} ${row.row}`);
+    const relabelBtn = actionBtn(t("relabel"), "edit", "hover:border-brand-600 hover:bg-brand-600 hover:text-white", `${t("relabel")} ${row.row}`);
+    const escalateBtn = actionBtn(t("escalate"), "flag", "hover:border-red-600 hover:bg-red-600 hover:text-white", `${t("escalate")} ${row.row}`);
+
+    function record(action, label) {
+      state.decisions[rowKey] = { action, label };
+      paint();
+      updateSummary();
+      notice.textContent = saveDecisions(state.batchId, state.decisions) ? "" : t("saveFail");
+    }
+    acceptBtn.addEventListener("click", () => record("accept", row.predicted));
+    relabelBtn.addEventListener("click", () => record("relabel", select.value));
+    escalateBtn.addEventListener("click", () => record("escalate", row.predicted));
+
+    paint();
+    const cell = (cls, children) => el("td", { class: `px-3 py-3 align-top ${cls}` }, children);
+    return el("tr", { class: "border-t border-slate-200 transition hover:bg-slate-50/70" }, [
+      cell("whitespace-nowrap text-sm", [
+        el("span", { class: "block font-medium tabular-nums text-slate-900" }, [`#${row.row}`]),
+        el("span", { class: "block text-xs text-slate-500" }, [row.course ?? t("noCourse")]),
+      ]),
+      cell("min-w-[16rem] max-w-md", [pComment, toggleBtn]),
+      cell("", [
+        polChip(row.predicted),
+        el("div", { class: "mt-2 flex flex-wrap gap-1" }, setChips),
+      ]),
+      cell("min-w-[10rem] text-xs text-slate-600", [getReasonText(row.reason, getLang())]),
+      cell("min-w-[15rem]", [
+        statusSlot,
+        el("div", { class: "mt-2 flex flex-wrap items-center gap-1.5" }, [acceptBtn, select, relabelBtn, escalateBtn]),
+      ]),
+    ]);
   }
 
   function renderTable() {
@@ -113,130 +204,18 @@ export function initReview(panel) {
       updateSummary();
       return;
     }
-
-    const headers = ["Row", "Course", "Comment", "Predicted", "Set", "Reason", "Decision"].map(
-      (h) => el("th", { scope: "col" }, [h])
+    const th = (key) => el("th", { scope: "col", class: "px-3 py-2 text-left text-xs font-semibold text-slate-600" }, [t(key)]);
+    const thead = el("thead", { class: "bg-slate-50" }, [
+      el("tr", {}, ["colRow", "colComment", "colPrediction", "colReason", "colAction"].map(th)),
+    ]);
+    const table = el("table", { class: "w-full border-collapse" }, [thead, el("tbody", {}, stagger(state.rows.slice(0, 20).map(buildRow), 40).concat(state.rows.slice(20).map(buildRow)))]);
+    tableContainer.replaceChildren(
+      el(
+        "div",
+        { class: "overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-card", role: "region", "aria-label": t("tableScroll"), tabindex: "0" },
+        [table]
+      )
     );
-    const thead = el("thead", {}, [el("tr", {}, headers)]);
-
-    const tbodyRows = state.rows.map((row) => {
-      const rowKey = String(row.row);
-      const decision = state.decisions[rowKey];
-
-      const pComment = el("p", { class: "clamp", id: `comment-${row.row}` }, [row.text]);
-      const toggleBtn = el(
-        "button",
-        {
-          type: "button",
-          class: "link-button clamp-toggle",
-          "aria-expanded": "false",
-          "aria-controls": `comment-${row.row}`,
-          hidden: "",
-        },
-        ["Show more"]
-      );
-      toggleBtn.addEventListener("click", () => {
-        const isClamped = pComment.classList.toggle("clamp");
-        toggleBtn.setAttribute("aria-expanded", isClamped ? "false" : "true");
-        toggleBtn.textContent = isClamped ? "Show more" : "Show less";
-      });
-
-      const setLabels =
-        row.conformal_set && row.conformal_set.length > 0
-          ? row.conformal_set.join(", ")
-          : "no class";
-
-      const reasonText = REASON_TEXT[row.reason] || row.reason;
-
-      const pStatus = el("p", { id: `status-${row.row}` }, [getStatusText(decision)]);
-
-      const acceptBtn = el(
-        "button",
-        {
-          type: "button",
-          "aria-label": `Accept row ${row.row} as ${row.predicted}`,
-        },
-        ["Accept"]
-      );
-
-      const relabelLabel = el(
-        "label",
-        {
-          class: "visually-hidden",
-          for: `relabel-${row.row}`,
-        },
-        [`New class for row ${row.row}`]
-      );
-
-      const select = el(
-        "select",
-        { id: `relabel-${row.row}` },
-        POLARITY_ORDER.map((pol) => {
-          const opt = el("option", { value: pol }, [pol]);
-          const selectedVal = decision && decision.action === "relabel" ? decision.label : row.predicted;
-          if (pol === selectedVal) {
-            opt.setAttribute("selected", "");
-          }
-          return opt;
-        })
-      );
-
-      const relabelBtn = el(
-        "button",
-        {
-          type: "button",
-          "aria-label": `Relabel row ${row.row}`,
-        },
-        ["Relabel"]
-      );
-
-      function recordDecision(action, label) {
-        state.decisions[rowKey] = { action, label };
-        pStatus.textContent = getStatusText(state.decisions[rowKey]);
-        updateSummary();
-        const ok = saveDecisions(state.batchId, state.decisions);
-        if (!ok) {
-          notice.textContent = "Your browser could not save this decision. Export the queue to keep it.";
-        } else {
-          notice.textContent = "";
-        }
-      }
-
-      acceptBtn.addEventListener("click", () => recordDecision("accept", row.predicted));
-      relabelBtn.addEventListener("click", () => recordDecision("relabel", select.value));
-
-      const actionsDiv = el("div", { class: "decision-actions" }, [
-        acceptBtn,
-        relabelLabel,
-        select,
-        relabelBtn,
-      ]);
-
-      return el("tr", {}, [
-        el("td", { class: "num" }, [String(row.row)]),
-        el("td", {}, [row.course ?? "No course"]),
-        el("td", { class: "comment-cell" }, [pComment, toggleBtn]),
-        el("td", {}, [row.predicted]),
-        el("td", {}, [setLabels]),
-        el("td", {}, [reasonText]),
-        el("td", {}, [pStatus, actionsDiv]),
-      ]);
-    });
-
-    const tbody = el("tbody", {}, tbodyRows);
-    const table = el("table", { class: "queue" }, [thead, tbody]);
-    const scrollRegion = el(
-      "div",
-      {
-        class: "table-scroll",
-        role: "region",
-        "aria-label": "Review queue table, scrolls sideways",
-        tabindex: "0",
-      },
-      [table]
-    );
-
-    tableContainer.replaceChildren(scrollRegion);
     updateSummary();
     setTimeout(refreshToggles, 0);
   }
@@ -244,25 +223,22 @@ export function initReview(panel) {
   document.addEventListener("batch-loaded", (e) => {
     const { batchId, response } = e.detail;
     const { decisions, readable } = loadDecisions(batchId);
-    state = {
-      batchId,
-      rows: queueRows(response),
-      decisions,
-    };
-    if (empty) {
-      empty.hidden = true;
-    }
-    if (!readable) {
-      notice.textContent = "Saved decisions for this file could not be read and were ignored.";
-    } else {
-      notice.textContent = "";
-    }
+    state = { batchId, rows: queueRows(response), decisions };
+    loaded = true;
+    empty.hidden = true;
+    notice.textContent = readable ? "" : t("readFail");
     renderTable();
   });
 
+  document.addEventListener("lang-changed", () => {
+    notice.textContent = "";
+    if (loaded) {
+      renderTable();
+    }
+  });
+
   exportBtn.addEventListener("click", () => {
-    const csv = buildQueueCsv(state.rows, state.decisions);
-    downloadCsv(csv, EXPORT_FILE_NAME);
+    downloadCsv(buildQueueCsv(state.rows, state.decisions), EXPORT_FILE_NAME);
   });
 
   document.addEventListener("tab-shown", (e) => {
