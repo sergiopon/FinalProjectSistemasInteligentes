@@ -1,0 +1,11 @@
+{
+  "name": "web-src",
+  "private": true,
+  "scripts": {
+    "build": "tailwindcss -c tailwind.config.js -i input.css -o ../web/styles.css --minify",
+    "watch": "tailwindcss -c tailwind.config.js -i input.css -o ../web/styles.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}

@@ -11,3 +11,6 @@ __pycache__/
 .ruff_cache/
 .pytest_cache/
 .coverage
+
+# Web tooling
+web-src/node_modules/

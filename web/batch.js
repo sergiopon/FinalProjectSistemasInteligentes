@@ -2,17 +2,18 @@
  * Batch upload and heatmap flow (spec 026).
  */
 
-import { ApiError, clearError, postBody, setBusy, showError } from "./common.js";
+import { ApiError, clearError, icon, stagger, postBody, setBusy, showError } from "./common.js";
+import { t } from "./i18n.js";
 import { countText, renderCourse, renderHeatmap, renderSummary } from "./report.js";
 
 export const MAX_UPLOAD_BYTES = 2097152;
 
 export function checkFile(file) {
   if (!file.name.toLowerCase().endsWith(".csv")) {
-    return "Choose a file whose name ends in .csv.";
+    return t("errNotCsv");
   }
   if (file.size > MAX_UPLOAD_BYTES) {
-    return "This file is over 2 MB. Choose a file of 2 MB or less.";
+    return t("errTooBig");
   }
   return null;
 }
@@ -23,8 +24,12 @@ export async function sha256Hex(buffer) {
   return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+const DRAG_CLASSES = ["is-dragover", "border-brand-600", "bg-blue-100", "scale-[1.01]"];
+
 export function initBatch(panel) {
   const dropzone = panel.querySelector("#dropzone");
+  const dropText = panel.querySelector("#dropzone-text");
+  const dropIcon = panel.querySelector("#drop-icon");
   const chooseFileBtn = panel.querySelector("#choose-file");
   const fileInput = panel.querySelector("#file-input");
   const fileStatus = panel.querySelector("#file-status");
@@ -40,6 +45,37 @@ export function initBatch(panel) {
   }
 
   let selectedFile = null;
+  let lastResponse = null;
+
+  if (dropIcon) {
+    dropIcon.replaceChildren(icon("upload", 24));
+  }
+
+  function showSelected() {
+    fileStatus.textContent = selectedFile
+      ? `${t("selected")}: ${selectedFile.name} (${countText(selectedFile.size, t("byte"), t("bytes"))})`
+      : t("noFileSelected");
+  }
+
+  function renderResult() {
+    if (!lastResponse) {
+      return;
+    }
+    result.replaceChildren(
+      renderSummary(lastResponse),
+      renderHeatmap(lastResponse.courses),
+      ...stagger(lastResponse.courses.map(renderCourse), 120)
+    );
+  }
+
+  function setDrag(active) {
+    for (const cls of DRAG_CLASSES) {
+      dropzone.classList.toggle(cls, active);
+    }
+    if (dropText) {
+      dropText.textContent = active ? t("dropzoneRelease") : t("dropzoneText");
+    }
+  }
 
   function handleFile(file) {
     if (!file) {
@@ -49,45 +85,49 @@ export function initBatch(panel) {
     if (message) {
       fileError.textContent = message;
       selectedFile = null;
-      fileStatus.textContent = "No file selected.";
       analyzeBtn.disabled = true;
     } else {
       fileError.textContent = "";
       selectedFile = file;
-      const sizeText = countText(file.size, "byte", "bytes");
-      fileStatus.textContent = `Selected: ${file.name} (${sizeText})`;
       analyzeBtn.disabled = false;
     }
+    showSelected();
   }
+
+  document.addEventListener("lang-changed", () => {
+    fileError.textContent = "";
+    showSelected();
+    renderResult();
+  });
 
   chooseFileBtn.addEventListener("click", () => {
     fileInput.click();
   });
 
   fileInput.addEventListener("change", (e) => {
-    const file = e.target.files && e.target.files[0];
-    handleFile(file);
+    handleFile(e.target.files && e.target.files[0]);
   });
 
   dropzone.addEventListener("dragenter", (e) => {
     e.preventDefault();
-    dropzone.classList.add("is-dragover");
+    setDrag(true);
   });
 
   dropzone.addEventListener("dragover", (e) => {
     e.preventDefault();
-    dropzone.classList.add("is-dragover");
+    setDrag(true);
   });
 
-  dropzone.addEventListener("dragleave", () => {
-    dropzone.classList.remove("is-dragover");
+  dropzone.addEventListener("dragleave", (e) => {
+    if (!dropzone.contains(e.relatedTarget)) {
+      setDrag(false);
+    }
   });
 
   dropzone.addEventListener("drop", (e) => {
     e.preventDefault();
-    dropzone.classList.remove("is-dragover");
-    const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
-    handleFile(file);
+    setDrag(false);
+    handleFile(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]);
   });
 
   window.addEventListener("dragover", (e) => {
@@ -108,10 +148,7 @@ export function initBatch(panel) {
     try {
       buffer = await selectedFile.arrayBuffer();
     } catch {
-      showError(
-        errors,
-        new ApiError("The file could not be read. Choose it again.", null)
-      );
+      showError(errors, new ApiError(t("errRead"), null));
       setBusy(analyzeBtn, result, loading, false);
       analyzeBtn.disabled = !selectedFile;
       return;
@@ -123,16 +160,9 @@ export function initBatch(panel) {
       if (empty) {
         empty.hidden = true;
       }
-      result.replaceChildren(
-        renderSummary(response),
-        renderHeatmap(response.courses),
-        ...response.courses.map(renderCourse)
-      );
-      document.dispatchEvent(
-        new CustomEvent("batch-loaded", {
-          detail: { batchId, response },
-        })
-      );
+      lastResponse = response;
+      renderResult();
+      document.dispatchEvent(new CustomEvent("batch-loaded", { detail: { batchId, response } }));
     } catch (error) {
       showError(errors, error);
     } finally {

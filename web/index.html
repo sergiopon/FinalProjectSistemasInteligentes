@@ -1,71 +1,124 @@
 <!doctype html>
-<html lang="en">
+<html lang="es" class="h-full">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>From comment to action</title>
+    <title>Del comentario a la acción</title>
     <link rel="stylesheet" href="styles.css">
     <script type="module" src="app.js"></script>
   </head>
-  <body>
-    <header>
-      <div class="header-top">
-        <h1 id="app-title">From comment to action</h1>
-        <button type="button" id="lang-toggle" class="lang-btn" aria-label="Cambiar idioma">Español / English</button>
+  <body class="min-h-full bg-slate-50 font-sans text-slate-800 antialiased">
+    <header class="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
+      <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        <div class="flex items-center gap-3">
+          <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 text-white shadow-sm animate-float" id="brand-mark" aria-hidden="true"></span>
+          <div>
+            <h1 class="text-base font-semibold leading-tight text-slate-900 sm:text-lg" id="app-title" data-i18n="appTitle">Del comentario a la acción</h1>
+            <p class="hidden text-xs text-slate-500 sm:block" data-i18n="appSubtitle">Análisis de evaluación docente con IA</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <div id="api-status" class="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600" role="status" aria-live="polite">
+            <span id="api-dot" class="h-2 w-2 rounded-full bg-slate-300"></span>
+            <span id="api-status-text" data-i18n="apiChecking">Verificando API…</span>
+          </div>
+          <div class="inline-flex rounded-lg border border-slate-200 bg-slate-100 p-0.5" role="group" aria-label="Idioma / Language" id="lang-group">
+            <button type="button" id="lang-es" data-lang="es" aria-pressed="true" class="lang-opt rounded-md px-2.5 py-1 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">ES</button>
+            <button type="button" id="lang-en" data-lang="en" aria-pressed="false" class="lang-opt rounded-md px-2.5 py-1 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500">EN</button>
+          </div>
+        </div>
       </div>
-      <p class="intro" id="app-intro">Analyze Spanish course-evaluation comments. Each result shows the likely polarity, the classes the model cannot rule out, and whether a person should review the comment. The service stores nothing you enter.</p>
     </header>
-    <main>
-      <div role="tablist" aria-label="Views">
-        <button role="tab" id="tab-single" aria-controls="panel-single" aria-selected="true" tabindex="0">Single comment</button>
-        <button role="tab" id="tab-batch" aria-controls="panel-batch" aria-selected="false" tabindex="-1">Batch upload</button>
-        <button role="tab" id="tab-review" aria-controls="panel-review" aria-selected="false" tabindex="-1">Review queue</button>
+
+    <main class="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+      <p class="mb-6 max-w-3xl text-sm leading-relaxed text-slate-600" id="app-intro" data-i18n="appIntro"></p>
+
+      <div role="tablist" aria-label="Views" class="mb-6 flex gap-1 overflow-x-auto border-b border-slate-200">
+        <button role="tab" id="tab-single" aria-controls="panel-single" aria-selected="true" tabindex="0" class="tab" data-i18n="tabSingle">Comentario individual</button>
+        <button role="tab" id="tab-batch" aria-controls="panel-batch" aria-selected="false" tabindex="-1" class="tab" data-i18n="tabBatch">Carga por lotes</button>
+        <button role="tab" id="tab-review" aria-controls="panel-review" aria-selected="false" tabindex="-1" class="tab">
+          <span data-i18n="tabReview">Cola de revisión</span>
+          <span id="review-count" class="ml-2 hidden min-w-[1.25rem] rounded-full bg-amber-500 px-1.5 text-center text-xs font-semibold text-white animate-pop">0</span>
+        </button>
       </div>
 
-      <section role="tabpanel" id="panel-single" aria-labelledby="tab-single">
-        <h2 id="single-title">Analyze one comment</h2>
-        <p class="empty" id="single-empty">Paste a comment and select Analyze.</p>
-        <div class="sample-chips" id="single-samples">
-          <span class="caption" id="samples-label">Examples to try:</span>
-          <button type="button" class="chip" data-sample="positive">Positive</button>
-          <button type="button" class="chip" data-sample="mixed">Mixed (Needs review)</button>
-          <button type="button" class="chip" data-sample="negative">Negative</button>
+      <section role="tabpanel" id="panel-single" aria-labelledby="tab-single" class="animate-fade-up">
+        <div class="grid items-start gap-6 lg:grid-cols-12">
+          <div class="card space-y-4 lg:sticky lg:top-24 lg:col-span-5 xl:col-span-4">
+            <h2 class="text-base font-semibold text-slate-900" id="single-title" data-i18n="singleTitle">Analizar un comentario</h2>
+
+            <div id="single-samples">
+              <p class="h-section mb-2" id="samples-label" data-i18n="examplesLabel">Ejemplos para probar</p>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" class="chip badge cursor-pointer bg-green-600 px-3 py-1.5 text-white transition duration-200 hover:-translate-y-0.5 hover:bg-green-700 hover:shadow-pop focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2" data-sample="positive" data-i18n="exPositive">Positivo</button>
+                <button type="button" class="chip badge cursor-pointer bg-amber-500 px-3 py-1.5 text-white transition duration-200 hover:-translate-y-0.5 hover:bg-amber-600 hover:shadow-pop focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2" data-sample="mixed" data-i18n="exMixed">Mixto (requiere revisión)</button>
+                <button type="button" class="chip badge cursor-pointer bg-red-600 px-3 py-1.5 text-white transition duration-200 hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-pop focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2" data-sample="negative" data-i18n="exNegative">Negativo</button>
+              </div>
+            </div>
+
+            <div>
+              <label for="comment-text" class="block text-sm font-medium text-slate-700" id="comment-label" data-i18n="commentLabel">Comentario</label>
+              <textarea id="comment-text" rows="8" aria-describedby="comment-counter" class="mt-2 w-full resize-y rounded-lg border border-slate-300 bg-white p-3 text-sm shadow-sm transition placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30"></textarea>
+              <div class="mt-2 flex items-center justify-between gap-3">
+                <p id="comment-counter" class="text-xs tabular-nums text-slate-500">0 / 2000</p>
+                <div class="h-1 w-24 overflow-hidden rounded-full bg-slate-200" aria-hidden="true"><div id="counter-bar" class="h-full rounded-full bg-brand-500 transition-all"></div></div>
+              </div>
+            </div>
+
+            <button type="button" id="analyze-button" class="btn btn-primary w-full" disabled data-i18n="analyzeBtn">Analizar</button>
+            <div id="single-loading" class="relative h-1 overflow-hidden rounded bg-slate-100" hidden><div class="absolute h-full w-1/3 rounded bg-brand-500 animate-slide"></div></div>
+            <div id="single-errors"></div>
+          </div>
+
+          <div class="lg:col-span-7 xl:col-span-8">
+            <div id="single-empty" class="flex min-h-[20rem] flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-white/60 p-8 text-center text-sm text-slate-500" data-i18n="singleEmpty">Pega un comentario y selecciona Analizar.</div>
+            <div id="single-result" aria-live="polite" aria-busy="false"></div>
+          </div>
         </div>
-        <label for="comment-text" id="comment-label">Comment</label>
-        <textarea id="comment-text" rows="6" aria-describedby="comment-counter"></textarea>
-        <p id="comment-counter" class="counter">0 / 2000 characters</p>
-        <button type="button" id="analyze-button" class="primary" disabled>Analyze</button>
-        <div id="single-loading" class="loading-bar" hidden></div>
-        <div id="single-errors"></div>
-        <div id="single-result" aria-live="polite" aria-busy="false"></div>
       </section>
 
-      <section role="tabpanel" id="panel-batch" aria-labelledby="tab-batch" hidden>
-        <h2 id="batch-title">Analyze a CSV file</h2>
-        <p class="empty" id="batch-empty">Upload a CSV file to see the course heatmap.</p>
-        <div class="dropzone" id="dropzone">
-          <p id="dropzone-text">Drop a CSV file here or choose a file</p>
-          <button type="button" id="choose-file">Choose file</button>
-          <input type="file" id="file-input" accept=".csv,text/csv" hidden>
-          <p class="hint" id="file-hint">UTF-8 CSV with columns feedback and curso, up to 2 MB and 5,000 rows</p>
-          <p class="hint sample-hint" id="sample-csv-hint">Tip: Use Dataset/feedback_curso_universitario3.csv from the project</p>
+      <section role="tabpanel" id="panel-batch" aria-labelledby="tab-batch" hidden class="animate-fade-up">
+        <div class="card">
+          <h2 class="text-base font-semibold text-slate-900" id="batch-title" data-i18n="batchTitle">Analizar un archivo CSV</h2>
+          <div class="dropzone mt-4 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-8 text-center transition" id="dropzone">
+            <span id="drop-icon" class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-brand-600 text-white animate-float" aria-hidden="true"></span>
+            <p class="text-sm font-medium text-slate-700" id="dropzone-text" data-i18n="dropzoneText">Arrastra un archivo CSV aquí o selecciona un archivo</p>
+            <button type="button" id="choose-file" class="btn mt-4" data-i18n="chooseFileBtn">Elegir archivo</button>
+            <input type="file" id="file-input" accept=".csv,text/csv" hidden>
+            <p class="mt-4 text-xs text-slate-500" id="file-hint" data-i18n="hintText"></p>
+            <p class="mt-1 text-xs italic text-slate-400" id="sample-csv-hint" data-i18n="sampleCsvHint"></p>
+          </div>
+          <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p id="file-status" aria-live="polite" class="text-sm text-slate-600" data-i18n="noFileSelected">Ningún archivo seleccionado.</p>
+              <p id="file-error" class="text-sm font-medium text-pol-neg" role="alert"></p>
+            </div>
+            <button type="button" id="analyze-file" class="btn btn-primary" disabled data-i18n="analyzeFileBtn">Analizar archivo</button>
+          </div>
+          <div id="batch-loading" class="relative mt-3 h-1 overflow-hidden rounded bg-slate-100" hidden><div class="absolute h-full w-1/3 rounded bg-brand-500 animate-slide"></div></div>
+          <div id="batch-errors"></div>
         </div>
-        <p id="file-status" aria-live="polite">No file selected.</p>
-        <p id="file-error" class="field-error" role="alert"></p>
-        <button type="button" id="analyze-file" class="primary" disabled>Analyze file</button>
-        <div id="batch-loading" class="loading-bar" hidden></div>
-        <div id="batch-errors"></div>
-        <div id="batch-result" aria-live="polite" aria-busy="false"></div>
+        <p class="mt-6 rounded-xl border border-dashed border-slate-300 bg-white/60 p-8 text-center text-sm text-slate-500" id="batch-empty" data-i18n="batchEmpty">Sube un archivo CSV para ver el mapa de calor del curso.</p>
+        <div id="batch-result" aria-live="polite" aria-busy="false" class="mt-6 space-y-6"></div>
       </section>
 
-      <section role="tabpanel" id="panel-review" aria-labelledby="tab-review" hidden>
-        <h2 id="review-title">Review queue</h2>
-        <p class="empty" id="review-empty">Upload a CSV file in Batch upload to fill the review queue.</p>
-        <p id="review-summary" hidden></p>
-        <p id="review-notice" class="field-error" role="alert"></p>
-        <button type="button" id="export-csv" class="primary" disabled>Export CSV</button>
-        <p class="caption" id="review-caption">Decisions are saved in this browser only. Export the queue to share them.</p>
-        <div id="review-table"></div>
+      <section role="tabpanel" id="panel-review" aria-labelledby="tab-review" hidden class="animate-fade-up">
+        <div class="card">
+          <div class="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h2 class="text-base font-semibold text-slate-900" id="review-title" data-i18n="reviewTitle">Cola de revisión</h2>
+              <p id="review-summary" hidden class="mt-1 text-sm text-slate-600"></p>
+              <p class="mt-1 text-xs text-slate-500" id="review-caption" data-i18n="reviewCaption"></p>
+            </div>
+            <button type="button" id="export-csv" class="btn btn-primary" disabled data-i18n="exportBtn">Exportar CSV</button>
+          </div>
+          <div id="review-progress" class="mt-4 hidden">
+            <div class="h-2 overflow-hidden rounded-full bg-slate-100"><div id="review-progress-bar" class="h-full rounded-full bg-pol-pos transition-all duration-300"></div></div>
+          </div>
+          <p id="review-notice" class="mt-3 text-sm font-medium text-pol-neg" role="alert"></p>
+        </div>
+        <p class="mt-6 rounded-xl border border-dashed border-slate-300 bg-white/60 p-8 text-center text-sm text-slate-500" id="review-empty" data-i18n="reviewEmpty"></p>
+        <div id="review-table" class="mt-6"></div>
       </section>
     </main>
   </body>

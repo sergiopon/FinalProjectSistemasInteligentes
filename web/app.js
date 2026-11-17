@@ -3,79 +3,90 @@
  */
 
 import { initBatch } from "./batch.js";
-import { initTabs } from "./common.js";
-import { getLang, setLang, t } from "./i18n.js";
+import { icon, initTabs } from "./common.js";
+import { SAMPLE_COMMENTS, getLang, setLang, t } from "./i18n.js";
 import { initReview } from "./review.js";
 import { initSingle } from "./single.js";
 
+const HEALTH_INTERVAL_MS = 15000;
+
 function applyLanguage(lang) {
   setLang(lang);
-  const textMap = {
-    "app-title": t("appTitle"),
-    "app-intro": t("appIntro"),
-    "tab-single": t("tabSingle"),
-    "tab-batch": t("tabBatch"),
-    "tab-review": t("tabReview"),
-    "single-title": t("singleTitle"),
-    "single-empty": t("singleEmpty"),
-    "comment-label": t("commentLabel"),
-    "analyze-button": t("analyzeBtn"),
-    "samples-label": t("examplesLabel"),
-    "batch-title": t("batchTitle"),
-    "batch-empty": t("batchEmpty"),
-    "dropzone-text": t("dropzoneText"),
-    "choose-file": t("chooseFileBtn"),
-    "file-hint": t("hintText"),
-    "sample-csv-hint": t("sampleCsvHint"),
-    "analyze-file": t("analyzeFileBtn"),
-    "review-title": t("reviewTitle"),
-    "review-empty": t("reviewEmpty"),
-    "export-csv": t("exportBtn"),
-    "review-caption": t("reviewCaption"),
-  };
-  for (const [id, val] of Object.entries(textMap)) {
-    const el = document.getElementById(id);
-    if (el) {
-      el.textContent = val;
-    }
+  document.documentElement.lang = lang;
+  document.title = t("appTitle");
+  for (const node of document.querySelectorAll("[data-i18n]")) {
+    node.textContent = t(node.dataset.i18n);
   }
-  const chips = document.querySelectorAll(".chip");
-  if (chips.length >= 3) {
-    chips[0].textContent = `⭐ ${t("exPositive")}`;
-    chips[1].textContent = `⚠️ ${t("exMixed")}`;
-    chips[2].textContent = `❌ ${t("exNegative")}`;
+  for (const node of document.querySelectorAll("[data-sample]")) {
+    node.title = SAMPLE_COMMENTS[node.dataset.sample] || "";
   }
-  const toggle = document.getElementById("lang-toggle");
-  if (toggle) {
-    toggle.textContent = t("langToggle");
+  for (const btn of document.querySelectorAll("[data-lang]")) {
+    btn.setAttribute("aria-pressed", btn.dataset.lang === lang ? "true" : "false");
+  }
+  document.dispatchEvent(new CustomEvent("lang-changed", { detail: { lang } }));
+  checkHealth();
+}
+
+let lastHealth = null;
+
+function paintHealth() {
+  const dot = document.getElementById("api-dot");
+  const text = document.getElementById("api-status-text");
+  if (!dot || !text) {
+    return;
+  }
+  dot.className = "h-2 w-2 rounded-full";
+  if (lastHealth === null) {
+    dot.classList.add("bg-slate-300");
+    text.textContent = t("apiChecking");
+  } else if (lastHealth.ok) {
+    dot.classList.add("bg-emerald-500");
+    text.textContent = `${t("apiOnline")} · ${lastHealth.version}`;
+  } else {
+    dot.classList.add("bg-rose-500");
+    text.textContent = t("apiOffline");
   }
 }
 
+async function checkHealth() {
+  try {
+    const response = await fetch("/health");
+    const body = response.ok ? await response.json() : null;
+    lastHealth = body ? { ok: true, version: body.model_version || "" } : { ok: false };
+  } catch {
+    lastHealth = { ok: false };
+  }
+  paintHealth();
+}
+
 function init() {
+  const mark = document.getElementById("brand-mark");
+  if (mark) {
+    mark.replaceChildren(icon("spark", 20));
+  }
   const tablist = document.querySelector('[role="tablist"]');
   if (tablist) {
     initTabs(tablist);
   }
-  const singlePanel = document.getElementById("panel-single");
-  if (singlePanel) {
-    initSingle(singlePanel);
+  for (const [id, start] of [
+    ["panel-single", initSingle],
+    ["panel-batch", initBatch],
+    ["panel-review", initReview],
+  ]) {
+    const panel = document.getElementById(id);
+    if (panel) {
+      start(panel);
+    }
   }
-  const batchPanel = document.getElementById("panel-batch");
-  if (batchPanel) {
-    initBatch(batchPanel);
-  }
-  const reviewPanel = document.getElementById("panel-review");
-  if (reviewPanel) {
-    initReview(reviewPanel);
-  }
-  const langToggle = document.getElementById("lang-toggle");
-  if (langToggle) {
-    langToggle.addEventListener("click", () => {
-      const nextLang = getLang() === "es" ? "en" : "es";
-      applyLanguage(nextLang);
+  for (const btn of document.querySelectorAll("[data-lang]")) {
+    btn.addEventListener("click", () => {
+      if (btn.dataset.lang !== getLang()) {
+        applyLanguage(btn.dataset.lang);
+      }
     });
   }
   applyLanguage("es");
+  setInterval(checkHealth, HEALTH_INTERVAL_MS);
 }
 
 if (document.readyState === "loading") {
