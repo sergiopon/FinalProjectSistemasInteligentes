@@ -75,6 +75,10 @@ export function initReview(panel) {
   const exportBtn = panel.querySelector("#export-csv");
   const tableContainer = panel.querySelector("#review-table");
 
+  if (!empty || !summary || !notice || !exportBtn || !tableContainer) {
+    return;
+  }
+
   let state = { batchId: null, rows: [], decisions: {} };
 
   function refreshToggles() {

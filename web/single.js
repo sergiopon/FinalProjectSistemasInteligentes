@@ -18,7 +18,7 @@ import {
 export const MAX_TEXT_CHARS = 2000;
 
 export function textLength(value) {
-  return [...value.trim()].length;
+  return [...String(value ?? "").trim()].length;
 }
 
 function buildDecisionLine(decision, reason) {
@@ -120,6 +120,10 @@ export function initSingle(panel) {
   const errors = panel.querySelector("#single-errors");
   const result = panel.querySelector("#single-result");
   const empty = panel.querySelector("#single-empty");
+
+  if (!textarea || !counter || !button || !loading || !errors || !result) {
+    return;
+  }
 
   function updateCounter() {
     const n = textLength(textarea.value);

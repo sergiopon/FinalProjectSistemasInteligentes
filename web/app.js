@@ -7,7 +7,7 @@ import { initTabs } from "./common.js";
 import { initReview } from "./review.js";
 import { initSingle } from "./single.js";
 
-window.addEventListener("DOMContentLoaded", () => {
+function init() {
   const tablist = document.querySelector('[role="tablist"]');
   if (tablist) {
     initTabs(tablist);
@@ -24,4 +24,10 @@ window.addEventListener("DOMContentLoaded", () => {
   if (reviewPanel) {
     initReview(reviewPanel);
   }
-});
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}

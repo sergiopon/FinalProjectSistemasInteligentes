@@ -2,8 +2,8 @@
  * Batch upload and heatmap flow (spec 026).
  */
 
-import { ApiError, clearError, countText, postBody, setBusy, showError } from "./common.js";
-import { renderCourse, renderHeatmap, renderSummary } from "./report.js";
+import { ApiError, clearError, postBody, setBusy, showError } from "./common.js";
+import { countText, renderCourse, renderHeatmap, renderSummary } from "./report.js";
 
 export const MAX_UPLOAD_BYTES = 2097152;
 
@@ -34,6 +34,10 @@ export function initBatch(panel) {
   const errors = panel.querySelector("#batch-errors");
   const result = panel.querySelector("#batch-result");
   const empty = panel.querySelector("#batch-empty");
+
+  if (!dropzone || !chooseFileBtn || !fileInput || !fileStatus || !fileError || !analyzeBtn || !loading || !errors || !result) {
+    return;
+  }
 
   let selectedFile = null;
 
