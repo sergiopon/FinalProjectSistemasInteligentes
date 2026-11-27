@@ -154,14 +154,9 @@ export function createExplorer(response) {
   function rowItem(row) {
     const asp = state.aspect ? matchesAspect(row, state.aspect) : null;
     const polarity = asp ? asp.polarity : row.predicted;
-    const aspectChips = (row.aspects || []).map((a) => {
-      const tone = a.group === state.aspect ? `pol-${a.polarity}` : "border border-slate-300 bg-white text-slate-600";
-      return el("span", { class: `badge ${tone} !text-[11px]` }, [getAspectName(a.group, getLang())]);
-    });
     return el("li", { class: "rounded-lg border border-slate-200 bg-white p-3" }, [
       el("div", { class: "flex flex-wrap items-center gap-2" }, [
         el("span", { class: `badge pol-${polarity}` }, [polName(polarity)]),
-        ...aspectChips,
         row.decision === "review" ? el("span", { class: "badge bg-amber-500 text-white" }, [t("needsReview")]) : null,
         state.course === null && row.course ? el("span", { class: "text-xs text-slate-500" }, [row.course]) : null,
       ]),
