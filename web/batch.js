@@ -2,9 +2,10 @@
  * Batch upload and heatmap flow (spec 026).
  */
 
-import { ApiError, clearError, icon, stagger, postBody, setBusy, showError } from "./common.js";
+import { ApiError, clearError, icon, postBody, setBusy, showError } from "./common.js";
 import { t } from "./i18n.js";
-import { countText, renderCourse, renderHeatmap, renderSummary } from "./report.js";
+import { createExplorer } from "./explorer.js";
+import { countText, renderHeatmap, renderSummary } from "./report.js";
 
 export const MAX_UPLOAD_BYTES = 2097152;
 
@@ -61,10 +62,11 @@ export function initBatch(panel) {
     if (!lastResponse) {
       return;
     }
+    const explorer = createExplorer(lastResponse);
     result.replaceChildren(
       renderSummary(lastResponse),
-      renderHeatmap(lastResponse.courses),
-      ...stagger(lastResponse.courses.map(renderCourse), 120)
+      explorer.node,
+      renderHeatmap(lastResponse.courses, (course, group) => explorer.select(course, group, "negative"))
     );
   }
 

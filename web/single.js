@@ -48,7 +48,7 @@ function buildDecisionCard(data) {
   const review = data.decision !== "classify";
   const header = el(
     "div",
-    { class: `flex items-center gap-3 px-5 py-4 text-white ${review ? "bg-amber-500" : "bg-green-600"}` },
+    { class: `flex items-center gap-3 px-5 py-4 text-white ${review ? "bg-amber-500" : "bg-brand-600"}` },
     [
       el("span", { class: "flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/20" }, [icon(review ? "user" : "check", 22)]),
       el("div", { class: "min-w-0" }, [
@@ -92,12 +92,12 @@ function buildProbabilities(probabilities, predicted) {
 
 function certainty(size) {
   if (size === 1) {
-    return { text: t("certHigh"), cls: "bg-green-600" };
+    return { text: t("certHigh"), cls: "bg-brand-600" };
   }
   if (size === 2) {
     return { text: t("certMid"), cls: "bg-amber-500" };
   }
-  return { text: t("certLow"), cls: "bg-red-600" };
+  return { text: t("certLow"), cls: "bg-amber-700" };
 }
 
 function buildConformal(data) {
@@ -120,7 +120,7 @@ function buildConformal(data) {
   });
   return subCard(t("predSet"), [
     el("div", { class: "flex items-center justify-between gap-2" }, [
-      el("p", { class: `text-xs text-slate-500 ${NUM}` }, [`${t("predSetHint")} ${formatPercent(data.confidence_level)}`]),
+      el("p", { class: "text-xs text-slate-500" }, [t("predSetHint").replace("{p}", formatPercent(data.confidence_level))]),
       el("span", { class: `badge text-white ${cert.cls}` }, [cert.text]),
     ]),
     el("div", { class: "mt-3 flex gap-2" }, chips),
@@ -164,21 +164,21 @@ function buildAspects(aspects) {
   ]);
 }
 
-function buildInfluences(influences) {
+function buildInfluences(influences, predicted) {
   if (!influences || influences.length === 0) {
     return subCard(t("influencesTitle"), [el("p", { class: "text-sm text-slate-500" }, [t("noInfluences")])], "md:col-span-2");
   }
   const items = influences.map((item) => {
-    const neg = item.delta < 0;
-    return el("li", { class: `badge ${neg ? "pol-negative" : "pol-positive"} ${NUM}` }, [
-      `${item.word} ${neg ? "-" : "+"}${formatScore(Math.abs(item.delta))}`,
+    const against = item.delta < 0;
+    return el("li", { class: `badge ${against ? "bg-amber-500" : "bg-brand-600"} text-white ${NUM}` }, [
+      `${item.word} ${against ? "↓" : "↑"} ${formatScore(Math.abs(item.delta))}`,
     ]);
   });
   return subCard(
     t("influencesTitle"),
     [
       el("ul", { class: "flex flex-wrap gap-2" }, stagger(items, 50)),
-      el("p", { class: "mt-3 text-xs text-slate-500" }, [t("influencesCaption")]),
+      el("p", { class: "mt-3 text-xs text-slate-500" }, [t("influencesCaption").replace("{label}", polName(predicted))]),
     ],
     "md:col-span-2"
   );
@@ -190,7 +190,7 @@ function renderResultCard(data) {
     buildProbabilities(data.probabilities, data.predicted),
     buildConformal(data),
     buildAspects(data.aspects),
-    buildInfluences(data.influences),
+    buildInfluences(data.influences, data.predicted),
   ];
   return el("div", { class: "grid gap-4 transition-all duration-300 ease-in-out md:grid-cols-2" }, stagger(cards, 90));
 }

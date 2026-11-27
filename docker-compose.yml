@@ -1,0 +1,11 @@
+services:
+  api:
+    build: .
+    image: from-comment-to-action:0.1.0
+    user: "${UID:-1000}"
+    ports: ["127.0.0.1:8000:8000"]
+    volumes: ["./models:/app/models:ro,z"]
+    read_only: true
+    tmpfs: ["/tmp"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
