@@ -1,0 +1,7 @@
+*
+!requirements.txt
+!api/
+!ml/
+!web/
+!config/
+**/__pycache__
