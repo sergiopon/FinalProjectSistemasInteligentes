@@ -57,9 +57,9 @@ export function saveDecisions(batchId, decisions) {
 }
 
 const STATUS_STYLE = Object.freeze({
-  accept: { key: "statusAccepted", cls: "bg-green-600 text-white" },
+  accept: { key: "statusAccepted", cls: "bg-brand-600 text-white" },
   relabel: { key: "statusRelabeled", cls: "bg-brand-600 text-white" },
-  escalate: { key: "statusEscalated", cls: "bg-red-600 text-white" },
+  escalate: { key: "statusEscalated", cls: "bg-amber-500 text-white" },
 });
 
 function statusBadge(decision) {
@@ -77,10 +77,12 @@ function polChip(pol) {
 
 function choiceBtn(row, pol, record) {
   const suggested = pol === row.predicted;
-  const ring = suggested ? "ring-2 ring-brand-500 ring-offset-1" : "opacity-80 hover:opacity-100";
+  const ring = suggested
+    ? "border-2 border-brand-600 bg-brand-50 text-brand-900"
+    : "border border-slate-300 bg-white text-slate-700 hover:border-brand-500";
   const button = el(
     "button",
-    { type: "button", class: `badge pol-${pol} cursor-pointer !px-3 !py-1.5 text-xs transition ${ring}`, "aria-label": `${polName(pol)} #${row.row}` },
+    { type: "button", class: `badge cursor-pointer !px-3 !py-1.5 text-xs transition ${ring}`, "aria-label": `${polName(pol)} #${row.row}` },
     [suggested ? `${polName(pol)} · ${t("suggested")}` : polName(pol)]
   );
   button.addEventListener("click", () => record(pol === row.predicted ? "accept" : "relabel", pol));

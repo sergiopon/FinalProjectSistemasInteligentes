@@ -47,7 +47,7 @@ function kpi(label, value, tone = "text-slate-900") {
 export function renderSummary(response) {
   return el("div", { class: "grid grid-cols-2 gap-3 sm:grid-cols-4" }, stagger([
     kpi(t("kpiComments"), response.row_count),
-    kpi(t("kpiClassified"), response.decision_counts.classify, "text-green-600"),
+    kpi(t("kpiClassified"), response.decision_counts.classify, "text-brand-700"),
     kpi(t("kpiReview"), response.decision_counts.review, "text-amber-600"),
     kpi(t("kpiModel"), response.model_version, "text-brand-700"),
   ]));

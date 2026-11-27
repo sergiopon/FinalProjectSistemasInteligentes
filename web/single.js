@@ -48,7 +48,7 @@ function buildDecisionCard(data) {
   const review = data.decision !== "classify";
   const header = el(
     "div",
-    { class: `flex items-center gap-3 px-5 py-4 text-white ${review ? "bg-amber-500" : "bg-green-600"}` },
+    { class: `flex items-center gap-3 px-5 py-4 text-white ${review ? "bg-amber-500" : "bg-brand-600"}` },
     [
       el("span", { class: "flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/20" }, [icon(review ? "user" : "check", 22)]),
       el("div", { class: "min-w-0" }, [
@@ -92,12 +92,12 @@ function buildProbabilities(probabilities, predicted) {
 
 function certainty(size) {
   if (size === 1) {
-    return { text: t("certHigh"), cls: "bg-green-600" };
+    return { text: t("certHigh"), cls: "bg-brand-600" };
   }
   if (size === 2) {
     return { text: t("certMid"), cls: "bg-amber-500" };
   }
-  return { text: t("certLow"), cls: "bg-red-600" };
+  return { text: t("certLow"), cls: "bg-amber-700" };
 }
 
 function buildConformal(data) {
