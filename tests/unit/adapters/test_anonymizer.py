@@ -36,6 +36,15 @@ def anonymizer() -> SpacyAnonymizer:
             "El contenido fue claro, pero los parciales fueron difíciles.",
         ),
         ("", ""),
+        (
+            "Además, el curso fue bueno y también útil.",
+            "Además, el curso fue bueno y también útil.",
+        ),
+        ("Profesor, gracias por todo el semestre.", "Profesor, gracias por todo el semestre."),
+        (
+            "Me encontré con muchas dudas en los parciales.",
+            "Me encontré con muchas dudas en los parciales.",
+        ),
     ],
 )
 def test_anonymizer_masks(anonymizer: SpacyAnonymizer, text: str, expected: str) -> None:

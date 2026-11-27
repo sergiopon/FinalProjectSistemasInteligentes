@@ -2,7 +2,7 @@
 
 > Governing file. Every change MUST comply with it. Every rule is verifiable.
 > Framework: Colombian Law 1581 of 2012 (personal data protection) and Decree 1377 of 2013. Requirements: course
-> guide `CL12_26102026.pdf` (anonymization, trusted joblib files, version alignment) and `docs/analysis.md`.
+> guide `docs/curso/CL12_26102026.pdf` (anonymization, trusted joblib files, version alignment) and `docs/analysis.md`.
 
 ## 1. Personal and sensitive data
 

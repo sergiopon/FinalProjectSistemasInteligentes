@@ -1,57 +1,61 @@
 # From comment to action
 
-This project reads Spanish course-evaluation comments and returns, for each one, a polarity (negative, neutral or
-positive), the probability of each class, a conformal prediction set and a decision: classify the comment or send
-it to a person for review. It also scores 9 aspect groups and builds a report per course with an aspect heatmap, a
-priority ranking, topics and anonymized quotes. Everything runs on your machine: one FastAPI process on
-`127.0.0.1` serves the API and a static web page.
+Final project for **Intelligent Systems** (Sistemas Inteligentes): a system that reads Spanish course-evaluation
+comments and tells a teacher **what to fix first**.
 
-## Requirements
+For each comment it returns the polarity (negative, neutral or positive) with class probabilities, the set of classes
+it cannot rule out at 90 % confidence (conformal prediction), a decision (classify it or send it to a person for
+review), and which of 9 course aspects it mentions, with their sentiment. From a CSV it builds, per course, a ranking
+of what to fix first, a filterable list of comments and a heatmap that compares courses.
 
-Linux, [uv](https://docs.astral.sh/uv/), and Docker with the Compose plugin if you want the container. uv installs
-Python 3.12.14. The network is needed only to install packages, download the embedding model and build the image.
+> **Evaluators:** [`ENTREGA.md`](ENTREGA.md) (Spanish) maps every requirement of the course guide to the file and the
+> command that proves it. Full metrics are in [`docs/resultados.md`](docs/resultados.md).
 
-## Install
+## Key results (model `v001`, 124 held-out comments)
+
+| | |
+|---|---|
+| Polarity macro-F1 (test) | **0.733** (cross-validation 0.68; Dummy baseline 0.20) |
+| Best representation | Multilingual sentence embeddings beat TF-IDF with every classifier |
+| Conformal coverage | **0.952** for a 0.90 target |
+| Aspect macro-F1 | 0.48 (best: communication 0.86, organization 0.80, content 0.75) |
+| Tests | 814 unit tests, 98 % coverage, plus 18 integration tests on the real data |
+
+## Quick start
+
+The trained model `models/v001` is in the repository, so you do not need to train to try it.
+
+### With Docker
+
+```bash
+export UID                       # bash does not export it by default
+docker compose up --build -d
+bash scripts/smoke_docker.sh     # last line: SMOKE OK
+```
+
+Open <http://127.0.0.1:8000/>. Stop it with `docker compose down`.
+
+### Without Docker
+
+Requires Linux and [uv](https://docs.astral.sh/uv/), which installs Python 3.12.14.
 
 ```bash
 uv venv --python 3.12 --seed .venv
 .venv/bin/pip install -r requirements.txt -r requirements-dev.txt
-.venv/bin/python -m ml.representations --download
-```
-
-The last command downloads `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` at the revision pinned in
-`CONTEXT.md`. After it, nothing else goes to the network.
-
-## Train a model
-
-```bash
-.venv/bin/python -m ml.train
-.venv/bin/python -m ml.artifact verify v001
-```
-
-Training reads `Dataset/`, writes `models/v001/` and makes it the active version in `models/registry.json`. The
-service never trains. `.venv/bin/python -m ml.artifact rollback` returns to the previous version and
-`.venv/bin/python -m ml.artifact activate v001` selects one by name.
-
-## Check the model against people
-
-```bash
-.venv/bin/python -m ml.gold sample
-.venv/bin/python -m ml.gold agreement
-.venv/bin/python -m ml.gold_eval
-```
-
-`sample` writes `gold/sheet_a.csv` and `gold/sheet_b.csv` with the same comments. Two people label them without
-seeing each other's sheet. `agreement` writes Cohen's kappa to `gold/agreement.json`, and `ml.gold_eval` compares
-the active model with the rows where both people agree, in `reports/gold_eval.json`.
-
-## Run the service
-
-```bash
+.venv/bin/python -m ml.representations --download      # embedding model, the only network step
+.venv/bin/python -m ml.artifact verify v001            # verified=v001
 .venv/bin/uvicorn api.main:app --host 127.0.0.1 --port 8000
 ```
 
-Open <http://127.0.0.1:8000/> for the web page.
+## Using the web page
+
+| Tab | What to do | What you get |
+|---|---|---|
+| Single comment | Paste a comment or click an example, then **Analyze** | Polarity and probabilities, possible classes, classify or review, detected aspects, the words that weighed most |
+| Batch upload | Upload a UTF-8 CSV with columns `feedback` and `curso` (up to 2 MB and 5,000 rows); try `Dataset/feedback_curso_universitario.csv` | Totals, a course picker with the most urgent aspect and the top 3 to fix, the matching comments (filter by aspect, sentiment or text), and a heatmap that compares courses |
+| Review queue | For each doubtful comment choose Negative, Neutral or Positive (the model's suggestion is marked) or Not sure | Your decisions, exported as CSV; they stay in your browser |
+
+## API
 
 | Route | What it does |
 |---|---|
@@ -62,69 +66,115 @@ Open <http://127.0.0.1:8000/> for the web page.
 | `POST /drift` | Compares a CSV body with the training data |
 | `GET /metrics` | Latency p50 and p95, decision counts and the last drift report |
 
-## Run with Docker
+```bash
+curl -s -X POST http://127.0.0.1:8000/predict -H 'content-type: application/json' \
+  -d '{"text":"El contenido fue interesante, pero el horario de las clases fue muy incómodo."}'
+```
 
-Train a model first (it is read from `models/`). Run `export UID` if your shell does not export it, then
-`docker compose up --build`, and `bash scripts/smoke_docker.sh` to check it. Compose publishes port 8000 on
-`127.0.0.1` only, and the container runs with your user id.
+## How it works
 
-## Measure inference time
+```mermaid
+flowchart LR
+    A[Dataset CSV] --> B[ml.train<br/>clean, grouped split,<br/>24 candidates, conformal,<br/>aspects]
+    B --> C[models/vNNN<br/>bundle + manifest<br/>SHA-256, versions]
+    C -->|verified load| D[FastAPI service<br/>domain, ports,<br/>application, adapters]
+    D --> E[Web page]
+```
 
-`.venv/bin/python -m scripts.benchmark` loads the active model in the same process, sends 3 warm-up requests per route, then 100 requests to
-`/predict` and 20 requests of 100 rows to `/predict-batch`. It prints p50 and p95 latency in milliseconds as JSON.
-No socket is opened, so the times leave out network cost.
+- **Training** (`ml/`) runs offline with one command and writes an immutable version with its manifest, report and
+  drift reference. `models/registry.json` records the active version.
+- **Service** (`api/`) never trains. It loads the active version only after checking the bundle's SHA-256 and the
+  library versions against the manifest, because `joblib.load` can run code.
+- **Clean architecture:** a pure domain (decision agent, clauses, priorities), ports as Python protocols, use cases,
+  and adapters for scikit-learn, spaCy, CSV and HTTP. A test fails if a layer imports one it must not.
 
-## Limitations
+Details: [`ARCHITECTURE.md`](ARCHITECTURE.md) and the decision records in [`docs/adr/`](docs/adr/).
 
-- The data is synthetic. The 618 comments in `Dataset/` come from templates ("El curso fue bastante..." opens 61
-  of them), so these results say little about real student comments.
-- The labels are noisy. The overall polarity matches the sentiment of the comment's own aspects in about half of
-  the rows, and "neutral" often marks a mixed comment. A TF-IDF baseline reached macro-F1 0.62 in 5-fold
-  cross-validation, which is probably near the ceiling these labels allow. This is why the service abstains and
-  sends doubtful comments to review.
-- Aspect labels are incomplete: of 55 comments that mention "diapositiva", 31 carry that aspect. Metrics against
-  these labels count some correct predictions as errors; the gold set gives a cleaner measure.
-- Groups are templates, not authors. The dataset has no author column, so the train and test split keeps clusters
-  of near-identical comments on one side (`docs/adr/ADR-001-grouped-split-by-template-clusters.md`). Two comments
-  by the same person can still fall on both sides.
-- Deployment is local. The service listens on `127.0.0.1` and has no login, so do not expose it on a network.
+## Train, verify and roll back
+
+```bash
+.venv/bin/python -m ml.train                    # about 12 minutes on CPU; writes the next vNNN and activates it
+.venv/bin/python -m ml.artifact verify v001     # hash, versions and smoke predictions
+.venv/bin/python -m ml.artifact rollback        # back to the previous version
+.venv/bin/python -m ml.artifact activate v001   # select a version by name
+```
+
+## Check quality
+
+| Command | Expected |
+|---|---|
+| `bash scripts/gate.sh` | Format, lint, `mypy --strict`, architecture tests, unit tests with coverage ≥ 80 %, security scan and dependency audit, then `GATE OK` |
+| `.venv/bin/pytest -q -m integration` | Integration tests on the real dataset and embeddings |
+| `bash scripts/verify_clean_env.sh` | Fresh environment from the commit, tests and model verification, then `CLEAN ENV OK` |
+| `.venv/bin/python -m scripts.benchmark` | p50 and p95 latency of `/predict` and `/predict-batch` as JSON (`docs/benchmark-v001.json`) |
+
+## Check the model against people
+
+```bash
+.venv/bin/python -m ml.gold sample       # gold/sheet_a.csv and gold/sheet_b.csv
+.venv/bin/python -m ml.gold agreement    # Cohen's kappa in gold/agreement.json
+.venv/bin/python -m ml.gold_eval         # model vs. rows where both people agree
+```
+
+Two people label the sheets independently, following [`gold/guidelines.md`](gold/guidelines.md). The sheets have not
+been labeled yet.
 
 ## Security and ethics
 
-- Comments can contain names. Every comment the API returns in batch rows, quotes, summaries and course reports is
-  anonymized first: person names, emails, phone numbers and id numbers are masked. If the anonymizer cannot load,
-  the service does not start. `/predict` returns your own text unchanged.
-- The service stores nothing. Uploads are read in memory; predictions, counters and the last drift report are lost
-  on restart. Review decisions stay in your browser's local storage.
-- Logs go to stdout and never hold comment text or upload file names.
-- The service loads a model only from `models/`, and only when the SHA-256 of the bundle and the versions of
-  scikit-learn, numpy, joblib and mapie match its manifest. A mismatch stops the process.
-- While it runs, the service makes no network calls. Every response carries a strict Content-Security-Policy and
-  other browser security headers, and the web page builds its content without HTML strings.
-- A predicted label is a suggestion. Comments the model is unsure about go to a review queue, and the gold set,
-  labeled by two people, is what the model is measured against.
-- Do not send real student comments, logs, uploads or model files to external services.
+- Every comment the API returns in batch results is anonymized first: regular expressions mask emails, phone
+  numbers and id numbers, and spaCy masks person names (only entities tagged as proper nouns). If the anonymizer
+  cannot load, the service does not start. `/predict` returns your own text unchanged.
+- The service stores nothing and makes no network calls while it runs. Logs never hold comment text or file names.
+- Every response carries a strict Content-Security-Policy and other security headers.
+- A predicted label is a suggestion: doubtful comments go to the review queue.
+- Full rules: [`security-rules.md`](security-rules.md).
 
-## Team split
+## Limitations
 
-[Team split diagram](https://claude.ai/artifact/Pcs8ByvfPx34G7LvdD6UvJ) shows one lane per person, who waits on
-whom, and the critical path. The link is private: ask Sergio for access.
+- The data is synthetic: the 618 comments come from templates, so results say little about real comments.
+- The labels are noisy: the overall polarity matches the sentiment of the comment's own aspects in about half of the
+  rows, which is why the service abstains and sends doubtful comments to review (about 70 % of the sample CSV).
+- Aspect labels are incomplete, so aspect metrics count some correct predictions as errors.
+- There is no author column; the split groups near-identical comments instead
+  ([`ADR-001`](docs/adr/ADR-001-grouped-split-by-template-clusters.md)).
+- Deployment is local and containerized, not public: the service has no login, so do not expose it on a network.
+  Not publishing it to a cloud provider was a cost decision for an academic project; the image is ready for one.
 
-| Person | Area | Specs |
-|---|---|---|
-| Sergio Ponce | Tooling, Gate, domain, ports, benchmark and final README | 000 to 006, 030 |
-| Andres Acosta | ML: cleaning, split, embeddings, model selection, conformal, gold set and its evaluation | 007 to 011, 015, 029 |
-| Jose David Ruano | ML aspects, artifact registry, train CLI, adapters for settings, store, sklearn and text | 012 to 014, 016 to 019 |
-| Felipe Moncada | Monitoring, HTTP and CSV, application, API, web UI and Docker | 020 to 028 |
+## Repository map
 
-Critical path: 000, 002, 003, 007, 008 and 009, 010, 011, 013, 017, 018, 024, 025, 026, 027.
+| Path | Contents |
+|---|---|
+| `ml/` | Training pipeline, artifact and registry |
+| `api/` | Service: domain, ports, application, adapters, routes |
+| `web/`, `web-src/` | Web page and its Tailwind build (`cd web-src && npm ci && npm run build`) |
+| `models/v001/` | Trained model, manifest, report and drift reference |
+| `Dataset/` | The three course CSV files |
+| `docs/` | Analysis, results, contracts, ADRs, benchmark and the course guide (`docs/curso/`) |
+| `specs/` | The 31 specifications the project was built from |
+| `tests/` | Unit, integration and architecture tests |
+| `scripts/` | Gate, security scan, benchmark, Docker smoke test and clean-environment check |
 
-## Progress
+## Team
+
+| Person | Area |
+|---|---|
+| Sergio Ponce | Tooling, quality gate, domain, ports, benchmark |
+| Andrés Acosta | Data cleaning, split, embeddings, model selection, conformal, gold set |
+| José David Ruano | Aspects, artifact and registry, training CLI, adapters, Docker, web review |
+| Felipe Moncada | Monitoring, HTTP and CSV, application, API, web UI |
+
+## Development
+
+How we work: [`CONTRIBUTING.md`](CONTRIBUTING.md). Stack, pinned versions and commands: [`CONTEXT.md`](CONTEXT.md).
+Contracts shared by all specs: [`docs/contracts.md`](docs/contracts.md).
+
+<details>
+<summary>Spec progress</summary>
 
 <!-- progress:start -->
-_Updated 2026-11-16 from `specs/README.md`._
+_Updated 2026-11-27 from `specs/README.md`._
 
-Implemented: **30 of 31** specs.
+Implemented: **31 of 31** specs.
 
 | # | Spec | Owner | Status |
 |---|---|---|---|
@@ -156,19 +206,12 @@ Implemented: **30 of 31** specs.
 | 025 | [Web single comment](specs/025-web-single-comment.md) | Felipe Moncada | Implemented |
 | 026 | [Web batch and heatmap](specs/026-web-batch-heatmap.md) | Felipe Moncada | Implemented |
 | 027 | [Web review queue and export](specs/027-web-review-queue-export.md) | Felipe Moncada | Implemented |
-| 028 | [Docker and clean environment](specs/028-docker-clean-env.md) | Felipe Moncada | To draft |
+| 028 | [Docker and clean environment](specs/028-docker-clean-env.md) | Felipe Moncada | Implemented |
 | 029 | [ML gold-set evaluation](specs/029-ml-gold-evaluation.md) | Andres Acosta | Implemented |
 | 030 | [Benchmark and README](specs/030-benchmark-readme.md) | Sergio Ponce | Implemented |
 <!-- progress:end -->
 
 To update it, change the status of the spec in `specs/README.md`, run `bash scripts/update_progress.sh`, and commit
-both files together. A spec is `Ready` once its review is done and `Implemented` once it is merged into `main` with
-the Gate green.
+both files together.
 
-## Where things live
-
-- `CONTRIBUTING.md`: the workflow every teammate follows. Read it before your first spec.
-- `ARCHITECTURE.md` and `security-rules.md`: rules every spec follows.
-- `CONTEXT.md`: stack, pinned versions and commands, including the Gate.
-- `docs/contracts.md`: contracts shared by all specs. `docs/adr/`: architecture decisions.
-- `specs/`: one file per change, index in `specs/README.md`.
+</details>
