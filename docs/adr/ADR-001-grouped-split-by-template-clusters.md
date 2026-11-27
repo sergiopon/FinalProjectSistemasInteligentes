@@ -4,7 +4,7 @@ Status: Accepted (2026-11-05)
 
 ## Context
 
-The course guide (`CL12_26102026.pdf`) asks for a stratified 80/20 split grouped by author, with no information
+The course guide (`docs/curso/CL12_26102026.pdf`) asks for a stratified 80/20 split grouped by author, with no information
 leakage. The dataset (`Dataset/*.csv`, 618 rows) has no author column. The texts are synthetic and templated
 (`docs/analysis.md` §2), so near-duplicate comments in both train and test would inflate test metrics.
 

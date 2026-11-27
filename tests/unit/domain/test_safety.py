@@ -114,3 +114,15 @@ def test_mask_contact_data_long_token_is_linear() -> None:
     assert mask_contact_data(long_token) == long_token
     assert mask_contact_data("@" + long_token) == "@" + long_token
     assert time.perf_counter() - started < 1.0
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("client 172.18.0.1:54586 - GET /health", "client 172.18.0.1:54586 - GET /health"),
+        ("from 127.0.0.1", "from 127.0.0.1"),
+        ("llamar al 300.123.45.67", "llamar al [PHONE]"),
+    ],
+)
+def test_mask_contact_data_keeps_ipv4_addresses(text: str, expected: str) -> None:
+    assert mask_contact_data(text) == expected

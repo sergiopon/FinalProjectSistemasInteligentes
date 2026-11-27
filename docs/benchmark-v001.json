@@ -1,8 +1,17 @@
 {
   "model_version": "v001",
   "command": ".venv/bin/python -m scripts.benchmark",
-  "measured_on": "2026-11-09",
-  "hardware": "AMD Ryzen 7 5700X, 8 cores / 16 threads, CPU only, in-process FastAPI TestClient",
-  "predict": {"p50_ms": 329.6, "p95_ms": 356.15, "runs": 100},
-  "predict_batch": {"p50_ms": 1712.94, "p95_ms": 2262.56, "rows": 100, "runs": 20}
+  "measured_on": "2026-11-27",
+  "hardware": "AMD Ryzen 5 5600H with Radeon Graphics, 12 threads, CPU only, in-process FastAPI TestClient",
+  "predict": {
+    "p50_ms": 519.97,
+    "p95_ms": 649.58,
+    "runs": 100
+  },
+  "predict_batch": {
+    "p50_ms": 5925.04,
+    "p95_ms": 7829.33,
+    "rows": 100,
+    "runs": 20
+  }
 }

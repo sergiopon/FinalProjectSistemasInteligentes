@@ -2,12 +2,12 @@
 
 Date: 2026-11-05. Deadline: 2026-11-23.
 
-Sources: `CL12_26102026.pdf` (official guide), `01_Program.pdf` (program), `0b-Scheduling.pdf` (schedule), and the three
+Sources: `docs/curso/CL12_26102026.pdf` (official guide), `docs/curso/01_Program.pdf` (program), `docs/curso/0b-Scheduling.pdf` (schedule), and the three
 CSV files in `Dataset/`. Slides 7 and 8 of the guide are empty (title only).
 
 ## 1. Requirements
 
-### Mandatory (guide `CL12_26102026.pdf`)
+### Mandatory (guide `docs/curso/CL12_26102026.pdf`)
 
 | Part | Requirement |
 |---|---|

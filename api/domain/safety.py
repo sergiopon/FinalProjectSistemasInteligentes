@@ -17,6 +17,8 @@ PHONE_PATTERN: Final[re.Pattern[str]] = re.compile(r"\+?\(?\d[\d\s().-]{5,}\d")
 ID_PATTERN: Final[re.Pattern[str]] = re.compile(r"\b\d{6,10}\b")
 MIN_PHONE_DIGITS: Final[int] = 7
 MAX_UNSEPARATED_DIGITS: Final[int] = 10
+IPV4_PATTERN: Final[re.Pattern[str]] = re.compile(r"(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})")
+MAX_OCTET: Final[int] = 255
 EMAIL_MASK: Final = "[EMAIL]"
 PHONE_MASK: Final = "[PHONE]"
 ID_MASK: Final = "[ID]"
@@ -56,11 +58,17 @@ def _is_word_boundary(text: str, index: int) -> bool:
     return not 0 <= index < len(text) or not (text[index].isalnum() or text[index] == "_")
 
 
+def _is_ipv4(candidate: str) -> bool:
+    """Return True for a dotted IPv4 address, which log lines carry and is not a phone."""
+    found = IPV4_PATTERN.fullmatch(candidate)
+    return found is not None and all(int(octet) <= MAX_OCTET for octet in found.groups())
+
+
 def _mask_phone(match: re.Match[str]) -> str:
     """Mask a candidate with a separator, or over 10 digits not glued to word characters."""
     matched = match.group()
     digits = sum(character.isdecimal() for character in matched)
-    if digits < MIN_PHONE_DIGITS:
+    if digits < MIN_PHONE_DIGITS or _is_ipv4(matched):
         return matched
     standalone = _is_word_boundary(match.string, match.start() - 1) and _is_word_boundary(
         match.string, match.end()

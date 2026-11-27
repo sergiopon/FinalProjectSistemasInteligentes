@@ -6,6 +6,7 @@ import threading
 from typing import Final
 
 import spacy
+from spacy.tokens import Span
 
 from api.domain.errors import AnonymizerUnavailableError
 from api.domain.safety import mask_contact_data
@@ -13,12 +14,11 @@ from api.domain.safety import mask_contact_data
 DEFAULT_MODEL: Final = "es_core_news_sm"
 PERSON_LABEL: Final = "PER"
 PERSON_MASK: Final = "[PERSON]"
-EXCLUDED_PIPES: Final[tuple[str, ...]] = (
-    "parser",
-    "lemmatizer",
-    "morphologizer",
-    "attribute_ruler",
+PROPER_NOUN: Final = "PROPN"
+ROLE_WORDS: Final[frozenset[str]] = frozenset(
+    {"profesor", "profesora", "docente", "maestro", "maestra", "tutor", "tutora"}
 )
+EXCLUDED_PIPES: Final[tuple[str, ...]] = ("parser", "lemmatizer")
 
 
 class SpacyAnonymizer:
@@ -59,6 +59,17 @@ class SpacyAnonymizer:
         except ValueError as error:
             raise AnonymizerUnavailableError("anonymizer failed") from error
         for entity in reversed(doc.ents):
-            if entity.label_ == PERSON_LABEL:
+            if _is_person(entity):
                 masked = masked[: entity.start_char] + PERSON_MASK + masked[entity.end_char :]
         return masked
+
+
+def _is_person(entity: Span) -> bool:
+    """Keep a PER entity only when every token is a proper noun and it is not a lone role word.
+
+    The small Spanish model tags capitalized sentence openers ("Además", "También") and verbs
+    ("encontré") as PER; the part-of-speech check drops them.
+    """
+    if entity.label_ != PERSON_LABEL or not all(token.pos_ == PROPER_NOUN for token in entity):
+        return False
+    return not (len(entity) == 1 and entity.text.lower() in ROLE_WORDS)

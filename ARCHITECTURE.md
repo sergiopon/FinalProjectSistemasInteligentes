@@ -2,7 +2,7 @@
 
 > Governing file. Together with `security-rules.md` it is the project's source of truth.
 > No change can contradict it. If it changes, the impact on the other one is reviewed.
-> Source requirements: course guide `CL12_26102026.pdf` and `docs/analysis.md` (approved 2026-11-05).
+> Source requirements: course guide `docs/curso/CL12_26102026.pdf` and `docs/analysis.md` (approved 2026-11-05).
 
 ## 1. Overview
 
