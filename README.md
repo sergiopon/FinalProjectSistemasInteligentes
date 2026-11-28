@@ -1,5 +1,8 @@
 # From comment to action
 
+> ### ▶ [Watch the project presentation video](https://drive.google.com/file/d/13jAl6B3QxX9jNCTdNayvoRyPstJ2E_jt/view)
+> Architecture, model and metrics, installation and a live demo of the web app (about 20 minutes, in Spanish).
+
 Final project for **Intelligent Systems** (Sistemas Inteligentes): a system that reads Spanish course-evaluation
 comments and tells a teacher **what to fix first**.
 
@@ -8,8 +11,8 @@ it cannot rule out at 90 % confidence (conformal prediction), a decision (classi
 review), and which of 9 course aspects it mentions, with their sentiment. From a CSV it builds, per course, a ranking
 of what to fix first, a filterable list of comments and a heatmap that compares courses.
 
-> **Evaluators:** [`ENTREGA.md`](ENTREGA.md) (Spanish) maps every requirement of the course guide to the file and the
-> command that proves it. Full metrics are in [`docs/resultados.md`](docs/resultados.md).
+Technical documentation in Spanish: [`DOCUMENTACION.md`](DOCUMENTACION.md). Full metrics:
+[`docs/resultados.md`](docs/resultados.md).
 
 ## Key results (model `v001`, 124 held-out comments)
 
