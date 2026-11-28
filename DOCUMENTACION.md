@@ -1,5 +1,8 @@
 # Del comentario a la acción: documentación técnica
 
+> ### ▶ [Ver el video de presentación del proyecto](https://drive.google.com/file/d/13jAl6B3QxX9jNCTdNayvoRyPstJ2E_jt/view)
+> Arquitectura, modelo y métricas, instalación y demostración de la aplicación (unos 20 minutos).
+
 Sistema de análisis de comentarios de evaluación docente en español. Proyecto final de Sistemas Inteligentes de
 Sergio Ponce, Andrés Acosta, José David Ruano y Felipe Moncada.
 

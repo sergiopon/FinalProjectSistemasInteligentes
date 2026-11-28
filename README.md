@@ -1,5 +1,8 @@
 # From comment to action
 
+> ### ▶ [Watch the project presentation video](https://drive.google.com/file/d/13jAl6B3QxX9jNCTdNayvoRyPstJ2E_jt/view)
+> Architecture, model and metrics, installation and a live demo of the web app (about 20 minutes, in Spanish).
+
 Final project for **Intelligent Systems** (Sistemas Inteligentes): a system that reads Spanish course-evaluation
 comments and tells a teacher **what to fix first**.
 
